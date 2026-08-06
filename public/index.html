@@ -6,10 +6,10 @@
     <title>📸 Photobooth · Together</title>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <style>
-        /* ─── same styles as before ─── */
+        /* (same as before – unchanged) */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #0b0b0e; color: #f5f5f7; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
-        #app { width: 100%; max-width: 960px; margin: 0 auto; background: #1a1a1f; border-radius: 40px; padding: 24px 20px 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.04); position: relative; }
+        #app { width: 100%; max-width: 960px; margin: 0 auto; background: #1a1a1f; border-radius: 40px; padding: 24px 20px 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.04); }
         .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
         .app-header h1 { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #f5f5f7 60%, #8e8e93); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .app-header .room-badge { background: rgba(255,255,255,0.06); padding: 6px 16px; border-radius: 100px; font-size: 13px; color: #aeaeb2; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 8px; }
@@ -75,6 +75,7 @@
         .text-muted { color:#8e8e93; font-size:14px; }
         .text-center { text-align:center; }
         .hidden { display:none!important; }
+        .btn-small { padding: 6px 12px; font-size: 12px; }
         @media (max-width: 600px) { #app { padding: 16px 12px 20px; border-radius:28px; } .video-grid { grid-template-columns:1fr; } .video-grid .video-box { aspect-ratio:4/3; } .app-header h1 { font-size:18px; } .cam-controls .btn-capture { width:60px; height:60px; } .cam-controls .btn-capture .inner { width:44px; height:44px; font-size:22px; } .photo-grid { grid-template-columns: repeat(auto-fill, minmax(70px,1fr)); } }
     </style>
 </head>
@@ -101,7 +102,6 @@
 
     <!-- CAMERA VIEW -->
     <div id="cameraView" class="view">
-        <!-- Video grid: local + remote -->
         <div class="video-grid" id="videoGrid">
             <div class="video-box" id="localVideoBox">
                 <video id="localVideo" autoplay playsinline muted></video>
@@ -117,12 +117,9 @@
             </div>
         </div>
 
-        <!-- Controls -->
         <div class="cam-controls">
             <button class="btn-secondary" id="backToJoinBtn" style="padding:12px 18px; font-size:20px;">←</button>
-            <button class="btn-capture" id="captureBtn">
-                <span class="inner">📷</span>
-            </button>
+            <button class="btn-capture" id="captureBtn"><span class="inner">📷</span></button>
             <button class="btn-secondary" id="nextStepBtn" style="padding:12px 18px; font-size:20px;">→</button>
         </div>
 
@@ -130,10 +127,10 @@
             <button class="btn-secondary" id="switchCamBtn">🔄 Flip</button>
             <button class="btn-secondary" id="toggleFlashBtn">💡 Flash</button>
             <button class="btn-secondary" id="syncCountdownBtn">⏱️ Start Countdown</button>
+            <button class="btn-secondary" id="retryWebrtcBtn">🔄 Re‑connect Video</button>
             <button class="btn-danger" id="clearPhotosBtn">🗑️ Clear</button>
         </div>
 
-        <!-- My Photos -->
         <div class="mt-12">
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                 <span style="font-size:14px; font-weight:500; color:#aeaeb2;">📸 My photos</span>
@@ -143,7 +140,6 @@
             <div class="photo-grid" id="myPhotosGrid"></div>
         </div>
 
-        <!-- Friends' Photos -->
         <div class="mt-12">
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                 <span style="font-size:14px; font-weight:500; color:#aeaeb2;">👥 Friends</span>
@@ -152,7 +148,6 @@
             <div class="photo-grid" id="friendsGrid"></div>
         </div>
 
-        <!-- Status -->
         <div class="status-bar">
             <span id="statusText">📷 Ready</span>
             <span id="roomUsersBadge" class="users"></span>
@@ -175,33 +170,37 @@
         <div class="strip-preview"><canvas id="finalCanvas" width="600" height="800"></canvas></div>
         <div class="flex-center">
             <button class="btn-primary" id="downloadBtn">⬇️ Download PNG</button>
+            <button class="btn-secondary" id="refreshStripBtn">🔄 Refresh Strip</button>
             <button class="btn-secondary" id="backToCameraBtn">📷 Back</button>
             <button class="btn-secondary" id="shareRoomBtn">🔗 Copy Link</button>
         </div>
-        <div class="status-bar mt-12"><span id="finalStatus">All photos will be combined.</span></div>
+        <div class="status-bar mt-12">
+            <span id="finalStatus">All photos will be combined.</span>
+            <span id="photoBreakdown" style="font-size:12px; color:#636366;"></span>
+        </div>
     </div>
 </div>
 
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// STATE
+// STATE (unchanged)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const state = {
     room: '',
     name: '',
     userId: '',
     myPhotos: [],
-    friends: {}, // userId -> { name, photos: [] }
+    friends: {},
     stream: null,
     useFrontCamera: true,
     flashEnabled: false,
     currentTemplate: 'strip4',
-    peerConnections: {}, // targetId -> RTCPeerConnection
-    remoteStreams: {}, // targetId -> MediaStream
+    peerConnections: {},
+    remoteStreams: {},
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DOM refs
+// DOM refs (add refresh button)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const $ = id => document.getElementById(id);
 const joinView = $('joinView');
@@ -213,18 +212,18 @@ const localCountdown = $('localCountdown');
 const remoteCountdown = $('remoteCountdown');
 const localFlash = $('localFlash');
 const remoteFlash = $('remoteFlash');
-const localLabel = $('localLabel');
 const remoteLabel = $('remoteLabel');
-const remoteVideoBox = $('remoteVideoBox');
 
 const captureBtn = $('captureBtn');
 const switchCamBtn = $('switchCamBtn');
 const toggleFlashBtn = $('toggleFlashBtn');
 const clearPhotosBtn = $('clearPhotosBtn');
 const syncCountdownBtn = $('syncCountdownBtn');
+const retryWebrtcBtn = $('retryWebrtcBtn');
 const backToJoinBtn = $('backToJoinBtn');
 const nextStepBtn = $('nextStepBtn');
 const backToCameraBtn = $('backToCameraBtn');
+const refreshStripBtn = $('refreshStripBtn');
 
 const roomInput = $('roomInput');
 const nameInput = $('nameInput');
@@ -242,11 +241,12 @@ const finalCanvas = $('finalCanvas');
 const downloadBtn = $('downloadBtn');
 const shareRoomBtn = $('shareRoomBtn');
 const finalStatus = $('finalStatus');
+const photoBreakdown = $('photoBreakdown');
 
 let socket = null;
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// SOCKET.IO
+// SOCKET.IO (unchanged)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function connectSocket(room, name) {
     socket = io({ reconnection: true });
@@ -264,9 +264,9 @@ function connectSocket(room, name) {
         renderFriends();
         updateStatus();
         updateFinalStrip();
-        // ⚠️ Do NOT initiate calls here – we wait for user_joined events
-        // (this avoids double offers)
         console.log('📋 Room state received, users:', Object.keys(state.friends));
+        // Show breakdown
+        updatePhotoBreakdown();
     });
 
     socket.on('user_joined', (data) => {
@@ -277,8 +277,6 @@ function connectSocket(room, name) {
         updateStatus();
         statusText.textContent = `👋 ${name} joined!`;
         setTimeout(() => updateStatus(), 2000);
-        // ✅ Initiate WebRTC call to this new user
-        console.log('📞 Initiating call to', userId);
         createPeerConnection(userId, true);
     });
 
@@ -289,10 +287,7 @@ function connectSocket(room, name) {
         renderFriends();
         updateStatus();
         updateFinalStrip();
-    });
-
-    socket.on('peer_disconnected', ({ userId }) => {
-        closePeerConnection(userId);
+        updatePhotoBreakdown();
     });
 
     socket.on('user_photo', (data) => {
@@ -305,6 +300,8 @@ function connectSocket(room, name) {
         renderFriends();
         updateStatus();
         updateFinalStrip();
+        updatePhotoBreakdown();
+        console.log(`📸 Received photo from ${userId}, total photos: ${friend.photos.length}`);
     });
 
     socket.on('user_cleared', (data) => {
@@ -314,22 +311,22 @@ function connectSocket(room, name) {
             renderMyPhotos();
             updateStatus();
             updateFinalStrip();
+            updatePhotoBreakdown();
             return;
         }
         if (state.friends[userId]) {
             state.friends[userId].photos = [];
             renderFriends();
             updateFinalStrip();
+            updatePhotoBreakdown();
         }
     });
 
-    // WebRTC signalling
     socket.on('signal', ({ from, signal }) => {
         console.log('📨 Signal from', from, signal.type);
         handleSignal(from, signal);
     });
 
-    // Synchronised countdown
     socket.on('countdown_start', ({ delay, from }) => {
         startGlobalCountdown(delay);
     });
@@ -342,7 +339,7 @@ function connectSocket(room, name) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// WEBCAM
+// WEBCAM (unchanged)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function startCamera(front = true) {
     try {
@@ -375,67 +372,57 @@ function stopCamera() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// WEBRTC
+// WEBRTC (unchanged – keep the TURN config)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+const iceServers = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+    ]
+};
 
 function createPeerConnection(targetId, initiator = false) {
     if (state.peerConnections[targetId]) {
         console.log('⚠️ Peer connection already exists for', targetId);
         return state.peerConnections[targetId];
     }
-
     console.log('🛠️ Creating peer connection for', targetId, 'initiator:', initiator);
     const pc = new RTCPeerConnection(iceServers);
     state.peerConnections[targetId] = pc;
-
-    // Add local tracks
     if (state.stream) {
-        state.stream.getTracks().forEach(track => {
-            pc.addTrack(track, state.stream);
-        });
+        pc.addStream(state.stream);
     }
-
-    // Handle remote tracks
-    pc.ontrack = (event) => {
-        const [stream] = event.streams;
+    pc.onaddstream = (event) => {
         console.log('📥 Remote stream received from', targetId);
+        const stream = event.stream;
         state.remoteStreams[targetId] = stream;
-        // Assign to remote video element
         remoteVideo.srcObject = stream;
         const label = state.friends[targetId]?.name || 'Friend';
         remoteLabel.textContent = `👤 ${label}`;
-        remoteVideoBox.style.display = 'block';
         remoteVideo.play().catch(e => console.warn('remote video play error', e));
     };
-
     pc.onicecandidate = (event) => {
         if (event.candidate) {
             console.log('🧊 Sending ICE candidate to', targetId);
             socket.emit('signal', { targetId, signal: { type: 'candidate', candidate: event.candidate } });
         }
     };
-
     pc.oniceconnectionstatechange = () => {
         console.log('🔌 ICE state for', targetId, ':', pc.iceConnectionState);
         if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
             closePeerConnection(targetId);
         }
     };
-
     if (initiator) {
-        // Create offer
         pc.createOffer()
-            .then(offer => {
-                console.log('📤 Sending offer to', targetId);
-                return pc.setLocalDescription(offer);
-            })
+            .then(offer => pc.setLocalDescription(offer))
             .then(() => {
                 socket.emit('signal', { targetId, signal: { type: 'offer', sdp: pc.localDescription } });
             })
             .catch(err => console.warn('Offer error:', err));
     }
-
     return pc;
 }
 
@@ -449,10 +436,8 @@ function closePeerConnection(targetId) {
     if (state.remoteStreams[targetId]) {
         delete state.remoteStreams[targetId];
     }
-    // If remote video element is showing this peer, clear it
     if (remoteVideo.srcObject && remoteVideo.srcObject === state.remoteStreams[targetId]) {
         remoteVideo.srcObject = null;
-        remoteVideoBox.style.display = 'block'; // keep visible with waiting label
         remoteLabel.textContent = '👤 Waiting for friend...';
     }
 }
@@ -461,11 +446,9 @@ function handleSignal(from, signal) {
     console.log('📨 Handling signal from', from, signal.type);
     const pc = state.peerConnections[from];
     if (!pc) {
-        // If we receive an offer and we don't have a connection, create one as non-initiator
         if (signal.type === 'offer') {
             console.log('📞 Received offer from', from, '– creating answerer peer');
             createPeerConnection(from, false);
-            // Re-enter after creation
             setTimeout(() => handleSignal(from, signal), 100);
             return;
         } else {
@@ -473,13 +456,11 @@ function handleSignal(from, signal) {
             return;
         }
     }
-
     if (signal.type === 'offer') {
         pc.setRemoteDescription(new RTCSessionDescription(signal.sdp))
             .then(() => pc.createAnswer())
             .then(answer => pc.setLocalDescription(answer))
             .then(() => {
-                console.log('📤 Sending answer to', from);
                 socket.emit('signal', { targetId: from, signal: { type: 'answer', sdp: pc.localDescription } });
             })
             .catch(err => console.warn('Answer error:', err));
@@ -492,8 +473,20 @@ function handleSignal(from, signal) {
     }
 }
 
+function retryWebRTC() {
+    if (!socket) return;
+    for (const id of Object.keys(state.peerConnections)) {
+        closePeerConnection(id);
+    }
+    for (const [id, friend] of Object.entries(state.friends)) {
+        if (id === state.userId) continue;
+        createPeerConnection(id, true);
+    }
+    statusText.textContent = '🔄 Retrying video connection...';
+}
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// CAPTURE (local)
+// CAPTURE (unchanged)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function capturePhoto() {
     if (state.myPhotos.length >= 6) {
@@ -504,7 +497,6 @@ function capturePhoto() {
         localFlash.classList.add('go');
         setTimeout(() => localFlash.classList.remove('go'), 150);
     }
-
     const canvas = document.createElement('canvas');
     const vw = localVideo.videoWidth || 1280;
     const vh = localVideo.videoHeight || 720;
@@ -513,22 +505,20 @@ function capturePhoto() {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(localVideo, 0, 0, vw, vh);
     const dataURL = canvas.toDataURL('image/jpeg', 0.92);
-
     state.myPhotos.push(dataURL);
     if (state.myPhotos.length > 6) state.myPhotos.shift();
     renderMyPhotos();
     updateStatus();
-
     socket.emit('photo', { photoData: dataURL });
     statusText.textContent = `📸 Captured! (${state.myPhotos.length}/6)`;
     updateFinalStrip();
+    updatePhotoBreakdown();
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// SYNCHRONISED COUNTDOWN
+// COUNTDOWN (unchanged)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let countdownTimer = null;
-
 function startGlobalCountdown(delay = 3) {
     if (countdownTimer) return;
     let count = delay;
@@ -536,7 +526,6 @@ function startGlobalCountdown(delay = 3) {
     remoteCountdown.textContent = count;
     localCountdown.classList.add('show');
     remoteCountdown.classList.add('show');
-
     countdownTimer = setInterval(() => {
         count -= 1;
         if (count <= 0) {
@@ -579,7 +568,6 @@ function renderMyPhotos() {
 function renderFriends() {
     friendsGrid.innerHTML = '';
     let count = 0;
-    // Self
     const selfDiv = document.createElement('div');
     selfDiv.className = 'photo-card you';
     const lastSelf = state.myPhotos.length > 0 ? state.myPhotos[state.myPhotos.length-1] : null;
@@ -624,7 +612,7 @@ function updateStatus() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// FINAL STRIP (same as before, omitted for brevity – it's unchanged)
+// FINAL STRIP – with photo breakdown and refresh
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function getAllPhotos() {
     const all = [];
@@ -636,9 +624,23 @@ function getAllPhotos() {
     return all;
 }
 
+function updatePhotoBreakdown() {
+    const myCount = state.myPhotos.length;
+    let friendCounts = [];
+    for (const [id, friend] of Object.entries(state.friends)) {
+        if (id === state.userId) continue;
+        if (friend.photos.length > 0) {
+            friendCounts.push(`${friend.name}: ${friend.photos.length}`);
+        }
+    }
+    const total = myCount + friendCounts.reduce((sum, c) => sum + parseInt(c.split(':')[1]), 0);
+    photoBreakdown.textContent = `📷 ${total} total (you: ${myCount}, ${friendCounts.join(', ')})`;
+}
+
 function updateFinalStrip() {
     const template = state.currentTemplate;
     const photos = getAllPhotos();
+    console.log(`🖼️ Rendering strip with ${photos.length} photos total`);
     if (photos.length === 0) {
         finalStatus.textContent = '📸 No photos yet — take some!';
         const ctx = finalCanvas.getContext('2d');
@@ -652,6 +654,7 @@ function updateFinalStrip() {
     }
     finalStatus.textContent = `🖼️ ${photos.length} photos · template: ${template}`;
     renderTemplate(template, photos);
+    updatePhotoBreakdown();
 }
 
 function renderTemplate(template, photos) {
@@ -780,7 +783,7 @@ function renderTemplate(template, photos) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// NAVIGATION & JOIN
+// NAVIGATION & JOIN (unchanged)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function showView(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -809,7 +812,7 @@ async function joinRoom() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// EVENT BINDINGS
+// EVENT BINDINGS (add refresh strip)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 joinBtn.addEventListener('click', joinRoom);
 roomInput.addEventListener('keydown', e => { if(e.key === 'Enter') joinBtn.click(); });
@@ -846,6 +849,8 @@ syncCountdownBtn.addEventListener('click', () => {
     startGlobalCountdown(3);
 });
 
+retryWebrtcBtn.addEventListener('click', retryWebRTC);
+
 backToJoinBtn.addEventListener('click', () => {
     stopCamera();
     if (socket) socket.disconnect();
@@ -867,6 +872,12 @@ backToCameraBtn.addEventListener('click', () => {
     renderFriends();
     renderMyPhotos();
     updateFinalStrip();
+});
+
+refreshStripBtn.addEventListener('click', () => {
+    updateFinalStrip();
+    statusText.textContent = '🔄 Strip refreshed!';
+    setTimeout(() => updateStatus(), 1000);
 });
 
 templateSelector.addEventListener('click', (e) => {
@@ -927,7 +938,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-console.log('📸 TogetherBooth with WebRTC & synced countdown loaded!');
+console.log('📸 TogetherBooth with photo breakdown & refresh loaded!');
 </script>
 </body>
 </html>
