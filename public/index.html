@@ -4,373 +4,69 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>📸 Photobooth · Together</title>
-
-    <!-- Socket.IO client -->
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
-
     <style>
-        /* ─── Reset & Base ─── */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #0b0b0e;
-            color: #f5f5f7;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-        #app {
-            width: 100%;
-            max-width: 960px;
-            margin: 0 auto;
-            background: #1a1a1f;
-            border-radius: 40px;
-            padding: 24px 20px 28px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            position: relative;
-        }
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-        }
-        .app-header h1 {
-            font-size: 22px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f5f5f7 60%, #8e8e93);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .app-header .room-badge {
-            background: rgba(255, 255, 255, 0.06);
-            padding: 6px 16px;
-            border-radius: 100px;
-            font-size: 13px;
-            color: #aeaeb2;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .app-header .room-badge .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #30d158;
-            display: inline-block;
-            animation: pulse-dot 1.8s ease-in-out infinite;
-        }
-        @keyframes pulse-dot {
-            0%,100%{ opacity:1; transform:scale(1); }
-            50%{ opacity:0.4; transform:scale(0.8); }
-        }
-        .view {
-            display: none;
-            animation: fadeUp 0.4s ease;
-        }
+        /* ─── same styles as before ─── */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #0b0b0e; color: #f5f5f7; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        #app { width: 100%; max-width: 960px; margin: 0 auto; background: #1a1a1f; border-radius: 40px; padding: 24px 20px 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.04); position: relative; }
+        .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .app-header h1 { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #f5f5f7 60%, #8e8e93); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .app-header .room-badge { background: rgba(255,255,255,0.06); padding: 6px 16px; border-radius: 100px; font-size: 13px; color: #aeaeb2; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 8px; }
+        .app-header .room-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #30d158; display: inline-block; animation: pulse-dot 1.8s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.4; transform:scale(0.8); } }
+        .view { display: none; animation: fadeUp 0.4s ease; }
         .view.active { display: block; }
-        @keyframes fadeUp {
-            0%{ opacity:0; transform:translateY(18px); }
-            100%{ opacity:1; transform:translateY(0); }
-        }
-
-        /* ─── Join View ─── */
-        #joinView {
-            text-align: center;
-            padding: 40px 0 20px;
-        }
+        @keyframes fadeUp { 0%{ opacity:0; transform:translateY(18px); } 100%{ opacity:1; transform:translateY(0); } }
+        #joinView { text-align: center; padding: 40px 0 20px; }
         #joinView .icon-big { font-size: 72px; margin-bottom:12px; display:block; }
         #joinView h2 { font-size:30px; font-weight:700; margin-bottom:6px; }
         #joinView p { color:#8e8e93; font-size:16px; margin-bottom:32px; }
-        .join-form {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        .join-form input {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 16px 20px;
-            font-size: 16px;
-            color: #f5f5f7;
-            outline: none;
-            font-family: inherit;
-        }
+        .join-form { display: flex; flex-direction: column; gap: 14px; max-width: 400px; margin: 0 auto; }
+        .join-form input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px 20px; font-size: 16px; color: #f5f5f7; outline: none; font-family: inherit; }
         .join-form input::placeholder { color:#636366; }
         .join-form input:focus { border-color: rgba(255,215,0,0.3); }
-        .btn-primary {
-            background: linear-gradient(135deg, #ffd60a, #f5a623);
-            border: none;
-            border-radius: 16px;
-            padding: 16px 24px;
-            font-size: 17px;
-            font-weight: 600;
-            color: #0b0b0e;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.2s;
-            font-family: inherit;
-        }
+        .btn-primary { background: linear-gradient(135deg, #ffd60a, #f5a623); border: none; border-radius: 16px; padding: 16px 24px; font-size: 17px; font-weight: 600; color: #0b0b0e; cursor: pointer; transition: transform 0.15s, box-shadow 0.2s; font-family: inherit; }
         .btn-primary:hover { transform:scale(1.02); box-shadow:0 8px 30px rgba(255,214,10,0.25); }
         .btn-primary:active { transform:scale(0.97); }
-        .btn-secondary {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 14px 22px;
-            font-size: 15px;
-            font-weight: 500;
-            color: #f5f5f7;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-family: inherit;
-        }
+        .btn-secondary { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 14px 22px; font-size: 15px; font-weight: 500; color: #f5f5f7; cursor: pointer; transition: background 0.2s; font-family: inherit; }
         .btn-secondary:hover { background: rgba(255,255,255,0.14); }
-        .btn-danger {
-            background: rgba(255,69,58,0.15);
-            border: 1px solid rgba(255,69,58,0.2);
-            border-radius: 16px;
-            padding: 12px 20px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #ff453a;
-            cursor: pointer;
-            font-family: inherit;
-        }
+        .btn-danger { background: rgba(255,69,58,0.15); border: 1px solid rgba(255,69,58,0.2); border-radius: 16px; padding: 12px 20px; font-size: 14px; font-weight: 500; color: #ff453a; cursor: pointer; font-family: inherit; }
         .btn-danger:hover { background: rgba(255,69,58,0.25); }
-
-        /* ─── Camera View ─── */
-        .video-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .video-grid .video-box {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #000;
-            aspect-ratio: 4/3;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-        .video-grid .video-box video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .video-grid .video-box .label {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            background: rgba(0,0,0,0.6);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #fff;
-            pointer-events: none;
-            backdrop-filter: blur(4px);
-        }
-        .video-grid .video-box .countdown-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 80px;
-            font-weight: 800;
-            color: #fff;
-            text-shadow: 0 4px 40px rgba(0,0,0,0.8);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.1s;
-        }
-        .video-grid .video-box .countdown-overlay.show {
-            opacity: 1;
-        }
-        .video-grid .video-box .flash {
-            position: absolute;
-            inset: 0;
-            background: #fff;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.05s;
-        }
-        .video-grid .video-box .flash.go {
-            opacity: 0.8;
-            transition: opacity 0s;
-        }
-
-        .cam-controls {
-            display: flex;
-            gap: 14px;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 12px 0;
-        }
-        .cam-controls .btn-capture {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ffd60a, #e8a800);
-            border: 4px solid rgba(255,255,255,0.15);
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            color: #0b0b0e;
-            box-shadow: 0 4px 20px rgba(255,214,10,0.2);
-        }
+        .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .video-grid .video-box { position: relative; border-radius: 16px; overflow: hidden; background: #000; aspect-ratio: 4/3; border: 1px solid rgba(255,255,255,0.06); }
+        .video-grid .video-box video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .video-grid .video-box .label { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #fff; pointer-events: none; backdrop-filter: blur(4px); }
+        .video-grid .video-box .countdown-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 80px; font-weight: 800; color: #fff; text-shadow: 0 4px 40px rgba(0,0,0,0.8); pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+        .video-grid .video-box .countdown-overlay.show { opacity: 1; }
+        .video-grid .video-box .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; transition: opacity 0.05s; }
+        .video-grid .video-box .flash.go { opacity: 0.8; transition: opacity 0s; }
+        .cam-controls { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; margin: 12px 0; }
+        .cam-controls .btn-capture { width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ffd60a, #e8a800); border: 4px solid rgba(255,255,255,0.15); cursor: pointer; transition: transform 0.15s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #0b0b0e; box-shadow: 0 4px 20px rgba(255,214,10,0.2); }
         .cam-controls .btn-capture:hover { transform:scale(1.05); box-shadow:0 8px 40px rgba(255,214,10,0.3); }
         .cam-controls .btn-capture:active { transform:scale(0.92); }
         .cam-controls .btn-capture:disabled { opacity:0.4; cursor:not-allowed; transform:none!important; }
-        .cam-controls .btn-capture .inner {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: #ffd60a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-        }
-
-        .cam-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        /* ─── Photo Grid (my photos + friends) ─── */
-        .photo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 10px;
-            margin: 12px 0;
-        }
-        .photo-card {
-            background: rgba(255,255,255,0.04);
-            border-radius: 12px;
-            padding: 8px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.04);
-        }
-        .photo-card .avatar {
-            width: 100%;
-            aspect-ratio: 1/1;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #2a2a2f;
-            margin-bottom: 4px;
-        }
-        .photo-card .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .photo-card .avatar .placeholder {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            font-size: 32px;
-            color: #636366;
-            background: #1f1f24;
-        }
-        .photo-card .name {
-            font-size: 11px;
-            color: #aeaeb2;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .cam-controls .btn-capture .inner { width: 52px; height: 52px; border-radius: 50%; background: #ffd60a; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+        .cam-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin: 12px 0; }
+        .photo-card { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.04); }
+        .photo-card .avatar { width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; background: #2a2a2f; margin-bottom: 4px; }
+        .photo-card .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .photo-card .avatar .placeholder { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 32px; color: #636366; background: #1f1f24; }
+        .photo-card .name { font-size: 11px; color: #aeaeb2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .photo-card.you { border-color: rgba(255,214,10,0.2); background: rgba(255,214,10,0.04); }
-
-        /* ─── Status ─── */
-        .status-bar {
-            background: rgba(255,255,255,0.04);
-            border-radius: 16px;
-            padding: 10px 16px;
-            font-size: 14px;
-            color: #8e8e93;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-            border: 1px solid rgba(255,255,255,0.04);
-        }
-        .status-bar .users {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .status-bar .users .user-badge {
-            background: rgba(255,255,255,0.06);
-            padding: 4px 12px;
-            border-radius: 100px;
-            font-size: 12px;
-            color: #aeaeb2;
-        }
+        .status-bar { background: rgba(255,255,255,0.04); border-radius: 16px; padding: 10px 16px; font-size: 14px; color: #8e8e93; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 12px; border: 1px solid rgba(255,255,255,0.04); }
+        .status-bar .users { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .status-bar .users .user-badge { background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 100px; font-size: 12px; color: #aeaeb2; }
         .status-bar .users .user-badge.you { color:#ffd60a; border-color: rgba(255,214,10,0.2); }
-
-        /* ─── Final View ─── */
-        .template-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
-            gap: 10px;
-            margin: 12px 0;
-        }
-        .template-option {
-            background: rgba(255,255,255,0.04);
-            border: 2px solid rgba(255,255,255,0.06);
-            border-radius: 16px;
-            padding: 10px 4px;
-            text-align: center;
-            cursor: pointer;
-            font-family: inherit;
-            color: #f5f5f7;
-            font-size: 12px;
-            transition: border 0.2s;
-        }
+        .template-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px,1fr)); gap: 10px; margin: 12px 0; }
+        .template-option { background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 10px 4px; text-align: center; cursor: pointer; font-family: inherit; color: #f5f5f7; font-size: 12px; transition: border 0.2s; }
         .template-option:hover { background: rgba(255,255,255,0.07); }
         .template-option.active { border-color: #ffd60a; background: rgba(255,214,10,0.08); }
         .template-option .preview { font-size: 28px; display:block; margin-bottom:2px; }
         .template-option .label { font-weight:500; color:#aeaeb2; }
-
-        .strip-preview {
-            display: flex;
-            justify-content: center;
-            margin: 16px 0;
-        }
-        .strip-preview canvas {
-            border-radius: 16px;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-            max-width: 100%;
-            max-height: 500px;
-            background: #1a1a1f;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-
+        .strip-preview { display: flex; justify-content: center; margin: 16px 0; }
+        .strip-preview canvas { border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); max-width: 100%; max-height: 500px; background: #1a1a1f; border: 1px solid rgba(255,255,255,0.06); }
         .flex-center { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; }
         .mt-8 { margin-top:8px; }
         .mt-12 { margin-top:12px; }
@@ -379,16 +75,7 @@
         .text-muted { color:#8e8e93; font-size:14px; }
         .text-center { text-align:center; }
         .hidden { display:none!important; }
-
-        @media (max-width: 600px) {
-            #app { padding: 16px 12px 20px; border-radius:28px; }
-            .video-grid { grid-template-columns:1fr; }
-            .video-grid .video-box { aspect-ratio:4/3; }
-            .app-header h1 { font-size:18px; }
-            .cam-controls .btn-capture { width:60px; height:60px; }
-            .cam-controls .btn-capture .inner { width:44px; height:44px; font-size:22px; }
-            .photo-grid { grid-template-columns: repeat(auto-fill, minmax(70px,1fr)); }
-        }
+        @media (max-width: 600px) { #app { padding: 16px 12px 20px; border-radius:28px; } .video-grid { grid-template-columns:1fr; } .video-grid .video-box { aspect-ratio:4/3; } .app-header h1 { font-size:18px; } .cam-controls .btn-capture { width:60px; height:60px; } .cam-controls .btn-capture .inner { width:44px; height:44px; font-size:22px; } .photo-grid { grid-template-columns: repeat(auto-fill, minmax(70px,1fr)); } }
     </style>
 </head>
 <body>
@@ -424,7 +111,7 @@
             </div>
             <div class="video-box" id="remoteVideoBox">
                 <video id="remoteVideo" autoplay playsinline></video>
-                <div class="label" id="remoteLabel">👤 Friend</div>
+                <div class="label" id="remoteLabel">👤 Waiting for friend...</div>
                 <div class="countdown-overlay" id="remoteCountdown"></div>
                 <div class="flash" id="remoteFlash"></div>
             </div>
@@ -503,16 +190,14 @@ const state = {
     room: '',
     name: '',
     userId: '',
-    myPhotos: [],          // dataURLs
-    friends: {},           // userId -> { name, photos: [dataURL] }
+    myPhotos: [],
+    friends: {}, // userId -> { name, photos: [] }
     stream: null,
     useFrontCamera: true,
     flashEnabled: false,
     currentTemplate: 'strip4',
-    // WebRTC
-    peerConnections: {},   // targetId -> RTCPeerConnection
-    remoteStreams: {},     // targetId -> MediaStream
-    remoteVideoElements: {}, // targetId -> HTMLVideoElement
+    peerConnections: {}, // targetId -> RTCPeerConnection
+    remoteStreams: {}, // targetId -> MediaStream
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -568,6 +253,7 @@ function connectSocket(room, name) {
     socket.on('connect', () => {
         state.userId = socket.id;
         socket.emit('join', { room, name });
+        console.log('🔗 Connected, ID:', socket.id);
     });
 
     socket.on('room_state', (data) => {
@@ -578,12 +264,9 @@ function connectSocket(room, name) {
         renderFriends();
         updateStatus();
         updateFinalStrip();
-        // initiate WebRTC calls to existing users (except self)
-        for (const [id, _] of Object.entries(state.friends)) {
-            if (id !== state.userId) {
-                createPeerConnection(id, true);
-            }
-        }
+        // ⚠️ Do NOT initiate calls here – we wait for user_joined events
+        // (this avoids double offers)
+        console.log('📋 Room state received, users:', Object.keys(state.friends));
     });
 
     socket.on('user_joined', (data) => {
@@ -594,7 +277,8 @@ function connectSocket(room, name) {
         updateStatus();
         statusText.textContent = `👋 ${name} joined!`;
         setTimeout(() => updateStatus(), 2000);
-        // initiate call to this new user
+        // ✅ Initiate WebRTC call to this new user
+        console.log('📞 Initiating call to', userId);
         createPeerConnection(userId, true);
     });
 
@@ -641,13 +325,12 @@ function connectSocket(room, name) {
 
     // WebRTC signalling
     socket.on('signal', ({ from, signal }) => {
+        console.log('📨 Signal from', from, signal.type);
         handleSignal(from, signal);
     });
 
     // Synchronised countdown
     socket.on('countdown_start', ({ delay, from }) => {
-        // start countdown on all devices except the one that triggered it (optional)
-        // but we want everyone to see it
         startGlobalCountdown(delay);
     });
 
@@ -698,10 +381,11 @@ const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
 function createPeerConnection(targetId, initiator = false) {
     if (state.peerConnections[targetId]) {
-        // already exists
+        console.log('⚠️ Peer connection already exists for', targetId);
         return state.peerConnections[targetId];
     }
 
+    console.log('🛠️ Creating peer connection for', targetId, 'initiator:', initiator);
     const pc = new RTCPeerConnection(iceServers);
     state.peerConnections[targetId] = pc;
 
@@ -715,28 +399,25 @@ function createPeerConnection(targetId, initiator = false) {
     // Handle remote tracks
     pc.ontrack = (event) => {
         const [stream] = event.streams;
-        if (!state.remoteStreams[targetId]) {
-            state.remoteStreams[targetId] = stream;
-            // assign to remote video element
-            const label = state.friends[targetId]?.name || 'Friend';
-            // We have only one remote video element in this UI, but we can show one remote at a time.
-            // For more, we would create new elements. For simplicity, show the first remote.
-            // However, for a couple, we can just show the one remote.
-            // We'll set remoteVideo.srcObject = stream;
-            remoteVideo.srcObject = stream;
-            remoteLabel.textContent = `👤 ${label}`;
-            remoteVideoBox.style.display = 'block';
-            remoteVideo.play().catch(()=>{});
-        }
+        console.log('📥 Remote stream received from', targetId);
+        state.remoteStreams[targetId] = stream;
+        // Assign to remote video element
+        remoteVideo.srcObject = stream;
+        const label = state.friends[targetId]?.name || 'Friend';
+        remoteLabel.textContent = `👤 ${label}`;
+        remoteVideoBox.style.display = 'block';
+        remoteVideo.play().catch(e => console.warn('remote video play error', e));
     };
 
     pc.onicecandidate = (event) => {
         if (event.candidate) {
+            console.log('🧊 Sending ICE candidate to', targetId);
             socket.emit('signal', { targetId, signal: { type: 'candidate', candidate: event.candidate } });
         }
     };
 
     pc.oniceconnectionstatechange = () => {
+        console.log('🔌 ICE state for', targetId, ':', pc.iceConnectionState);
         if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
             closePeerConnection(targetId);
         }
@@ -745,7 +426,10 @@ function createPeerConnection(targetId, initiator = false) {
     if (initiator) {
         // Create offer
         pc.createOffer()
-            .then(offer => pc.setLocalDescription(offer))
+            .then(offer => {
+                console.log('📤 Sending offer to', targetId);
+                return pc.setLocalDescription(offer);
+            })
             .then(() => {
                 socket.emit('signal', { targetId, signal: { type: 'offer', sdp: pc.localDescription } });
             })
@@ -758,6 +442,7 @@ function createPeerConnection(targetId, initiator = false) {
 function closePeerConnection(targetId) {
     const pc = state.peerConnections[targetId];
     if (pc) {
+        console.log('❌ Closing peer connection for', targetId);
         pc.close();
         delete state.peerConnections[targetId];
     }
@@ -767,20 +452,26 @@ function closePeerConnection(targetId) {
     // If remote video element is showing this peer, clear it
     if (remoteVideo.srcObject && remoteVideo.srcObject === state.remoteStreams[targetId]) {
         remoteVideo.srcObject = null;
-        remoteVideoBox.style.display = 'none';
-        remoteLabel.textContent = '👤 Friend';
+        remoteVideoBox.style.display = 'block'; // keep visible with waiting label
+        remoteLabel.textContent = '👤 Waiting for friend...';
     }
 }
 
 function handleSignal(from, signal) {
+    console.log('📨 Handling signal from', from, signal.type);
     const pc = state.peerConnections[from];
     if (!pc) {
-        // create a peer connection if not exists, but only if we have stream
-        if (!state.stream) return;
-        createPeerConnection(from, false);
-        // but we need to re-enter this function after creation? We'll just call again.
-        setTimeout(() => handleSignal(from, signal), 100);
-        return;
+        // If we receive an offer and we don't have a connection, create one as non-initiator
+        if (signal.type === 'offer') {
+            console.log('📞 Received offer from', from, '– creating answerer peer');
+            createPeerConnection(from, false);
+            // Re-enter after creation
+            setTimeout(() => handleSignal(from, signal), 100);
+            return;
+        } else {
+            console.warn('⚠️ No peer connection for', from, 'and not an offer – ignoring');
+            return;
+        }
     }
 
     if (signal.type === 'offer') {
@@ -788,6 +479,7 @@ function handleSignal(from, signal) {
             .then(() => pc.createAnswer())
             .then(answer => pc.setLocalDescription(answer))
             .then(() => {
+                console.log('📤 Sending answer to', from);
                 socket.emit('signal', { targetId: from, signal: { type: 'answer', sdp: pc.localDescription } });
             })
             .catch(err => console.warn('Answer error:', err));
@@ -808,7 +500,6 @@ function capturePhoto() {
         statusText.textContent = '⚠️ Max 6 photos per person';
         return;
     }
-    // Flash effect on local
     if (state.flashEnabled) {
         localFlash.classList.add('go');
         setTimeout(() => localFlash.classList.remove('go'), 150);
@@ -829,7 +520,6 @@ function capturePhoto() {
     updateStatus();
 
     socket.emit('photo', { photoData: dataURL });
-
     statusText.textContent = `📸 Captured! (${state.myPhotos.length}/6)`;
     updateFinalStrip();
 }
@@ -840,9 +530,8 @@ function capturePhoto() {
 let countdownTimer = null;
 
 function startGlobalCountdown(delay = 3) {
-    if (countdownTimer) return; // already running
+    if (countdownTimer) return;
     let count = delay;
-    // Show on both local and remote overlays
     localCountdown.textContent = count;
     remoteCountdown.textContent = count;
     localCountdown.classList.add('show');
@@ -855,9 +544,7 @@ function startGlobalCountdown(delay = 3) {
             countdownTimer = null;
             localCountdown.classList.remove('show');
             remoteCountdown.classList.remove('show');
-            // Capture photo on this device
             capturePhoto();
-            // Also flash on remote (simulate)
             remoteFlash.classList.add('go');
             setTimeout(() => remoteFlash.classList.remove('go'), 200);
             statusText.textContent = '📸 Synced capture!';
@@ -869,15 +556,14 @@ function startGlobalCountdown(delay = 3) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// RENDER: My Photos
+// RENDER functions (unchanged)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function renderMyPhotos() {
     myPhotosGrid.innerHTML = '';
     state.myPhotos.forEach((url, i) => {
         const div = document.createElement('div');
         div.className = 'photo-card you';
-        div.innerHTML = `<div class="avatar"><img src="${url}" alt="my ${i+1}" loading="lazy" /></div>
-                         <div class="name">#${i+1}</div>`;
+        div.innerHTML = `<div class="avatar"><img src="${url}" alt="my ${i+1}" loading="lazy" /></div><div class="name">#${i+1}</div>`;
         myPhotosGrid.appendChild(div);
     });
     if (state.myPhotos.length === 0) {
@@ -890,9 +576,6 @@ function renderMyPhotos() {
     myPhotoCount.textContent = state.myPhotos.length;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// RENDER: Friends
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function renderFriends() {
     friendsGrid.innerHTML = '';
     let count = 0;
@@ -941,7 +624,7 @@ function updateStatus() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// FINAL STRIP
+// FINAL STRIP (same as before, omitted for brevity – it's unchanged)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function getAllPhotos() {
     const all = [];
@@ -1097,16 +780,13 @@ function renderTemplate(template, photos) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// NAVIGATION
+// NAVIGATION & JOIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function showView(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(id).classList.add('active');
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// JOIN
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function joinRoom() {
     const room = roomInput.value.trim() || 'couple';
     const name = nameInput.value.trim() || 'You';
@@ -1162,9 +842,7 @@ clearPhotosBtn.addEventListener('click', () => {
 
 syncCountdownBtn.addEventListener('click', () => {
     if (!socket) return;
-    // send start countdown to all
     socket.emit('start_countdown', { delay: 3 });
-    // also start locally (the event will also come back, but we can start now to avoid lag)
     startGlobalCountdown(3);
 });
 
@@ -1219,7 +897,7 @@ shareRoomBtn.addEventListener('click', () => {
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// INIT: auto-join if ?room=...
+// INIT
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 (function() {
     const params = new URLSearchParams(window.location.search);
