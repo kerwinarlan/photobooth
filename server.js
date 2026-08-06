@@ -1,143 +1,167 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+"use strict";
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+const path = require("path");
+const fs = require("fs");
+const http = require("http");
+const crypto = require("crypto");
+const { Server } = require("socket.io");
 
-// Serve static files (this will serve your index.html from the same folder)
-app.use(express.static(path.join(__dirname, 'public')));
+const PORT = Number(process.env.PORT || 3000);
+const MAX_ROOM_SIZE = 2;
+const MAX_PHOTOS = 6;
+const MAX_PHOTO_DATA_LENGTH = 1_500_000;
+const INDEX_PATH = path.join(__dirname, "index.html");
 
-// Provide ICE server configuration (TURN/STUN) to the client
-app.get('/ice-config', (req, res) => {
-  res.json({
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
-      {
-        urls: 'turn:openrelay.metered.ca:80',
-        username: 'openrelayproject',
-        credential: 'openrelayproject'
-      },
-      {
-        urls: 'turn:openrelay.metered.ca:443',
-        username: 'openrelayproject',
-        credential: 'openrelayproject'
-      }
-    ]
-  });
+const rooms = new Map();
+const memberships = new Map();
+
+function json(res, status, payload) {
+  res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  res.end(JSON.stringify(payload));
+}
+
+const server = http.createServer((req, res) => {
+  const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+  if (req.method === "GET" && url.pathname === "/") {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    fs.createReadStream(INDEX_PATH).pipe(res);
+    return;
+  }
+  if (req.method === "GET" && url.pathname === "/health") {
+    json(res, 200, { ok: true, rooms: rooms.size, now: Date.now() });
+    return;
+  }
+  if (req.method === "GET" && url.pathname === "/ice-config") {
+    const iceServers = [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" }
+    ];
+    if (process.env.TURN_URL && process.env.TURN_USERNAME && process.env.TURN_CREDENTIAL) {
+      iceServers.push({
+        urls: process.env.TURN_URL.split(",").map((value) => value.trim()).filter(Boolean),
+        username: process.env.TURN_USERNAME,
+        credential: process.env.TURN_CREDENTIAL
+      });
+    }
+    json(res, 200, { iceServers });
+    return;
+  }
+  res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+  res.end("Not found");
 });
 
-// In‑memory room storage
-const rooms = {};
+const io = new Server(server, {
+  maxHttpBufferSize: 2_000_000,
+  cors: { origin: process.env.ALLOWED_ORIGIN || true, methods: ["GET", "POST"] }
+});
 
-io.on('connection', (socket) => {
-  let currentRoom = null;
-  let currentName = '';
+function sanitizeRoom(value) {
+  return String(value || "").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+}
 
-  // ---- join ----
-  socket.on('join', ({ room, name }, callback) => {
-    currentRoom = room;
-    currentName = name;
+function sanitizeName(value) {
+  return String(value || "Guest").trim().replace(/\s+/g, " ").slice(0, 30) || "Guest";
+}
 
-    if (!rooms[room]) {
-      rooms[room] = { users: {} };
+function publicUsers(room) {
+  const users = rooms.get(room);
+  if (!users) return [];
+  return [...users.entries()].map(([id, user]) => ({ id, name: user.name, photos: user.photos }));
+}
+
+function sameRoom(socketIdA, socketIdB) {
+  const roomA = memberships.get(socketIdA);
+  return Boolean(roomA && roomA === memberships.get(socketIdB));
+}
+
+function removeFromRoom(socket, announce = true) {
+  const room = memberships.get(socket.id);
+  if (!room) return;
+  const users = rooms.get(room);
+  const user = users?.get(socket.id);
+  users?.delete(socket.id);
+  memberships.delete(socket.id);
+  socket.leave(room);
+  if (users && users.size === 0) rooms.delete(room);
+  if (announce) socket.to(room).emit("user_left", { userId: socket.id, name: user?.name || "Guest" });
+}
+
+io.on("connection", (socket) => {
+  socket.on("join", ({ room: rawRoom, name: rawName } = {}, callback = () => {}) => {
+    try {
+      const room = sanitizeRoom(rawRoom);
+      const name = sanitizeName(rawName);
+      if (!room) return callback({ ok: false, error: "Enter a valid room name." });
+
+      const previousRoom = memberships.get(socket.id);
+      if (previousRoom && previousRoom !== room) removeFromRoom(socket);
+
+      let users = rooms.get(room);
+      if (!users) { users = new Map(); rooms.set(room, users); }
+      if (!users.has(socket.id) && users.size >= MAX_ROOM_SIZE) return callback({ ok: false, error: "This booth already has two people." });
+
+      users.set(socket.id, users.get(socket.id) || { name, photos: [] });
+      users.get(socket.id).name = name;
+      memberships.set(socket.id, room);
+      socket.join(room);
+
+      callback({ ok: true, room, users: publicUsers(room), serverNow: Date.now() });
+      socket.to(room).emit("user_joined", { userId: socket.id, name });
+    } catch (error) {
+      console.error("join failed", error);
+      callback({ ok: false, error: "Could not join the room." });
     }
-    // Store user data
-    rooms[room].users[socket.id] = {
-      name: name,
-      photos: []
+  });
+
+  socket.on("sync_clock", (_payload, callback = () => {}) => callback({ ok: true, serverNow: Date.now() }));
+
+  socket.on("signal", ({ targetId, signal } = {}) => {
+    if (!targetId || !signal || !sameRoom(socket.id, targetId)) return;
+    io.to(targetId).emit("signal", { from: socket.id, signal });
+  });
+
+  socket.on("retry_peer", ({ targetId } = {}) => {
+    if (!targetId || !sameRoom(socket.id, targetId)) return;
+    io.to(targetId).emit("retry_peer", { from: socket.id });
+  });
+
+  socket.on("start_countdown", ({ delayMs } = {}, callback = () => {}) => {
+    const room = memberships.get(socket.id);
+    if (!room) return callback({ ok: false, error: "Join a room first." });
+    const safeDelay = Math.max(1200, Math.min(10_000, Number(delayMs) || 3000));
+    const payload = { captureId: crypto.randomUUID(), captureAt: Date.now() + safeDelay };
+    io.to(room).emit("countdown_start", payload);
+    callback({ ok: true, ...payload });
+  });
+
+  socket.on("photo", ({ photo } = {}) => {
+    const room = memberships.get(socket.id);
+    const user = rooms.get(room)?.get(socket.id);
+    if (!room || !user || !photo) return;
+    if (typeof photo.dataURL !== "string" || !photo.dataURL.startsWith("data:image/") || photo.dataURL.length > MAX_PHOTO_DATA_LENGTH) return;
+
+    const safePhoto = {
+      id: String(photo.id || crypto.randomUUID()).slice(0, 80),
+      dataURL: photo.dataURL,
+      takenAt: Number(photo.takenAt) || Date.now(),
+      captureId: photo.captureId ? String(photo.captureId).slice(0, 80) : null
     };
-    socket.join(room);
-
-    // Send the full room state to the new user
-    const userList = Object.entries(rooms[room].users).map(([id, user]) => ({
-      id,
-      name: user.name,
-      photos: user.photos
-    }));
-    callback({ ok: true, users: userList });
-
-    // Broadcast to others in the room that a new user joined
-    socket.to(room).emit('user_joined', {
-      userId: socket.id,
-      name: name
-    });
+    user.photos = [...user.photos.filter((item) => item.id !== safePhoto.id), safePhoto].slice(-MAX_PHOTOS);
+    socket.to(room).emit("user_photo", { userId: socket.id, name: user.name, photo: safePhoto });
   });
 
-  // ---- sync_clock ----
-  socket.on('sync_clock', (_, callback) => {
-    callback({ serverNow: Date.now() });
+  socket.on("clear_photos", () => {
+    const room = memberships.get(socket.id);
+    const user = rooms.get(room)?.get(socket.id);
+    if (!room || !user) return;
+    user.photos = [];
+    socket.to(room).emit("user_cleared", { userId: socket.id });
   });
 
-  // ---- signal (WebRTC) ----
-  socket.on('signal', ({ targetId, signal }) => {
-    io.to(targetId).emit('signal', { from: socket.id, signal });
-  });
-
-  // ---- retry_peer ----
-  socket.on('retry_peer', ({ targetId }) => {
-    io.to(targetId).emit('retry_peer', { from: socket.id });
-  });
-
-  // ---- start_countdown ----
-  socket.on('start_countdown', ({ delayMs }, callback) => {
-    if (!currentRoom) {
-      return callback({ ok: false, error: 'Not in a room' });
-    }
-    const captureId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
-    const captureAt = Date.now() + delayMs;
-    io.to(currentRoom).emit('countdown_start', { captureId, captureAt });
-    callback({ ok: true, captureId });
-  });
-
-  // ---- photo ----
-  socket.on('photo', ({ photo }) => {
-    if (!currentRoom) return;
-    const room = rooms[currentRoom];
-    if (!room) return;
-    const user = room.users[socket.id];
-    if (!user) return;
-
-    // Store the photo (limit to 6)
-    user.photos.push(photo);
-    if (user.photos.length > 6) user.photos.shift();
-
-    // Broadcast to everyone else in the room
-    socket.to(currentRoom).emit('user_photo', {
-      userId: socket.id,
-      name: user.name,
-      photo: photo
-    });
-  });
-
-  // ---- clear_photos ----
-  socket.on('clear_photos', () => {
-    if (!currentRoom) return;
-    const room = rooms[currentRoom];
-    if (!room) return;
-    const user = room.users[socket.id];
-    if (user) user.photos = [];
-    socket.to(currentRoom).emit('user_cleared', { userId: socket.id });
-  });
-
-  // ---- disconnect ----
-  socket.on('disconnect', () => {
-    if (currentRoom && rooms[currentRoom]) {
-      const name = rooms[currentRoom].users[socket.id]?.name || 'Someone';
-      delete rooms[currentRoom].users[socket.id];
-      socket.to(currentRoom).emit('user_left', { userId: socket.id, name });
-      // Clean up empty rooms
-      if (Object.keys(rooms[currentRoom].users).length === 0) {
-        delete rooms[currentRoom];
-      }
-    }
-  });
+  socket.on("disconnect", () => removeFromRoom(socket));
 });
 
-const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`TogetherBooth running on http://localhost:${PORT}`);
+  if (!process.env.TURN_URL) console.log("TURN is not configured. STUN-only WebRTC may fail on restrictive networks.");
 });
