@@ -6,8 +6,7 @@
     <title>📸 Photobooth · Together</title>
 
     <!-- Socket.IO client -->
-    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js">
-    </script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 
     <style>
         /* ─── Reset & Base ─── */
@@ -16,9 +15,8 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: #0b0b0e;
             color: #f5f5f7;
             min-height: 100vh;
@@ -27,65 +25,42 @@
             justify-content: center;
             padding: 16px;
         }
-
-        /* ─── App Container ─── */
         #app {
             width: 100%;
-            max-width: 820px;
+            max-width: 960px;
             margin: 0 auto;
             background: #1a1a1f;
             border-radius: 40px;
-            padding: 28px 24px 32px;
+            padding: 24px 20px 28px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.04);
             position: relative;
-            overflow: hidden;
         }
-
-        #app::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 20%, rgba(255, 215, 0, 0.03) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        /* ─── Header ─── */
         .app-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px;
-            position: relative;
-            z-index: 2;
+            margin-bottom: 18px;
         }
-
         .app-header h1 {
             font-size: 22px;
             font-weight: 700;
-            letter-spacing: -0.4px;
             background: linear-gradient(135deg, #f5f5f7 60%, #8e8e93);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
         .app-header .room-badge {
             background: rgba(255, 255, 255, 0.06);
             padding: 6px 16px;
             border-radius: 100px;
             font-size: 13px;
-            font-weight: 500;
             color: #aeaeb2;
             border: 1px solid rgba(255, 255, 255, 0.06);
             display: flex;
             align-items: center;
             gap: 8px;
         }
-
         .app-header .room-badge .dot {
             width: 8px;
             height: 8px;
@@ -94,40 +69,18 @@
             display: inline-block;
             animation: pulse-dot 1.8s ease-in-out infinite;
         }
-
         @keyframes pulse-dot {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.4;
-                transform: scale(0.8);
-            }
+            0%,100%{ opacity:1; transform:scale(1); }
+            50%{ opacity:0.4; transform:scale(0.8); }
         }
-
-        /* ─── Views ─── */
         .view {
             display: none;
             animation: fadeUp 0.4s ease;
-            position: relative;
-            z-index: 2;
         }
-
-        .view.active {
-            display: block;
-        }
-
+        .view.active { display: block; }
         @keyframes fadeUp {
-            0% {
-                opacity: 0;
-                transform: translateY(18px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            0%{ opacity:0; transform:translateY(18px); }
+            100%{ opacity:1; transform:translateY(0); }
         }
 
         /* ─── Join View ─── */
@@ -135,26 +88,9 @@
             text-align: center;
             padding: 40px 0 20px;
         }
-
-        #joinView .icon-big {
-            font-size: 72px;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        #joinView h2 {
-            font-size: 30px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        #joinView p {
-            color: #8e8e93;
-            font-size: 16px;
-            margin-bottom: 32px;
-        }
-
+        #joinView .icon-big { font-size: 72px; margin-bottom:12px; display:block; }
+        #joinView h2 { font-size:30px; font-weight:700; margin-bottom:6px; }
+        #joinView p { color:#8e8e93; font-size:16px; margin-bottom:32px; }
         .join-form {
             display: flex;
             flex-direction: column;
@@ -162,27 +98,18 @@
             max-width: 400px;
             margin: 0 auto;
         }
-
         .join-form input {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 16px;
             padding: 16px 20px;
             font-size: 16px;
             color: #f5f5f7;
             outline: none;
-            transition: border 0.2s;
             font-family: inherit;
         }
-
-        .join-form input::placeholder {
-            color: #636366;
-        }
-
-        .join-form input:focus {
-            border-color: rgba(255, 215, 0, 0.3);
-        }
-
+        .join-form input::placeholder { color:#636366; }
+        .join-form input:focus { border-color: rgba(255,215,0,0.3); }
         .btn-primary {
             background: linear-gradient(135deg, #ffd60a, #f5a623);
             border: none;
@@ -194,21 +121,12 @@
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.2s;
             font-family: inherit;
-            letter-spacing: -0.2px;
         }
-
-        .btn-primary:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 30px rgba(255, 214, 10, 0.25);
-        }
-
-        .btn-primary:active {
-            transform: scale(0.97);
-        }
-
+        .btn-primary:hover { transform:scale(1.02); box-shadow:0 8px 30px rgba(255,214,10,0.25); }
+        .btn-primary:active { transform:scale(0.97); }
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 16px;
             padding: 14px 22px;
             font-size: 15px;
@@ -218,85 +136,79 @@
             transition: background 0.2s;
             font-family: inherit;
         }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.14);
-        }
-
+        .btn-secondary:hover { background: rgba(255,255,255,0.14); }
         .btn-danger {
-            background: rgba(255, 69, 58, 0.15);
-            border: 1px solid rgba(255, 69, 58, 0.2);
+            background: rgba(255,69,58,0.15);
+            border: 1px solid rgba(255,69,58,0.2);
             border-radius: 16px;
             padding: 12px 20px;
             font-size: 14px;
             font-weight: 500;
             color: #ff453a;
             cursor: pointer;
-            transition: background 0.2s;
             font-family: inherit;
         }
-
-        .btn-danger:hover {
-            background: rgba(255, 69, 58, 0.25);
-        }
+        .btn-danger:hover { background: rgba(255,69,58,0.25); }
 
         /* ─── Camera View ─── */
-        #cameraView .camera-wrapper {
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .video-grid .video-box {
             position: relative;
-            border-radius: 24px;
+            border-radius: 16px;
             overflow: hidden;
             background: #000;
             aspect-ratio: 4/3;
-            max-height: 520px;
-            margin-bottom: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255,255,255,0.06);
         }
-
-        #cameraView .camera-wrapper video {
+        .video-grid .video-box video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
         }
-
-        #cameraView .camera-wrapper .cam-overlay {
+        .video-grid .video-box .label {
             position: absolute;
-            inset: 0;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #fff;
             pointer-events: none;
-            border-radius: 24px;
-            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
         }
-
-        #cameraView .camera-wrapper .countdown {
+        .video-grid .video-box .countdown-overlay {
             position: absolute;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 120px;
+            font-size: 80px;
             font-weight: 800;
             color: #fff;
-            text-shadow: 0 4px 40px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 4px 40px rgba(0,0,0,0.8);
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.1s;
         }
-
-        #cameraView .camera-wrapper .countdown.show {
+        .video-grid .video-box .countdown-overlay.show {
             opacity: 1;
         }
-
-        #cameraView .camera-wrapper .flash {
+        .video-grid .video-box .flash {
             position: absolute;
             inset: 0;
             background: #fff;
             opacity: 0;
             pointer-events: none;
-            border-radius: 24px;
             transition: opacity 0.05s;
         }
-
-        #cameraView .camera-wrapper .flash.go {
+        .video-grid .video-box .flash.go {
             opacity: 0.8;
             transition: opacity 0s;
         }
@@ -307,14 +219,14 @@
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
+            margin: 12px 0;
         }
-
         .cam-controls .btn-capture {
             width: 72px;
             height: 72px;
             border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #ffd60a, #e8a800);
-            border: 4px solid rgba(255, 255, 255, 0.15);
+            border: 4px solid rgba(255,255,255,0.15);
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.2s;
             display: flex;
@@ -322,24 +234,11 @@
             justify-content: center;
             font-size: 30px;
             color: #0b0b0e;
-            box-shadow: 0 4px 20px rgba(255, 214, 10, 0.2);
+            box-shadow: 0 4px 20px rgba(255,214,10,0.2);
         }
-
-        .cam-controls .btn-capture:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 40px rgba(255, 214, 10, 0.3);
-        }
-
-        .cam-controls .btn-capture:active {
-            transform: scale(0.92);
-        }
-
-        .cam-controls .btn-capture:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
+        .cam-controls .btn-capture:hover { transform:scale(1.05); box-shadow:0 8px 40px rgba(255,214,10,0.3); }
+        .cam-controls .btn-capture:active { transform:scale(0.92); }
+        .cam-controls .btn-capture:disabled { opacity:0.4; cursor:not-allowed; transform:none!important; }
         .cam-controls .btn-capture .inner {
             width: 52px;
             height: 52px;
@@ -356,136 +255,59 @@
             gap: 12px;
             flex-wrap: wrap;
             justify-content: center;
-            margin-top: 14px;
         }
 
-        /* ─── Photo Strip Preview ─── */
-        .strip-preview {
-            display: flex;
-            justify-content: center;
-            margin: 16px 0 20px;
-        }
-
-        .strip-preview canvas {
-            border-radius: 16px;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            max-width: 100%;
-            max-height: 500px;
-            background: #1a1a1f;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        /* ─── Gallery / Friends Grid ─── */
-        .friends-grid {
+        /* ─── Photo Grid (my photos + friends) ─── */
+        .photo-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 14px;
-            margin: 16px 0 20px;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin: 12px 0;
         }
-
-        .friend-card {
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 16px;
-            padding: 12px 8px 10px;
+        .photo-card {
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 8px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            transition: border 0.2s;
+            border: 1px solid rgba(255,255,255,0.04);
         }
-
-        .friend-card .avatar {
+        .photo-card .avatar {
             width: 100%;
             aspect-ratio: 1/1;
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
             background: #2a2a2f;
-            margin-bottom: 8px;
-            position: relative;
+            margin-bottom: 4px;
         }
-
-        .friend-card .avatar img {
+        .photo-card .avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
         }
-
-        .friend-card .avatar .placeholder {
+        .photo-card .avatar .placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100%;
-            font-size: 40px;
+            font-size: 32px;
             color: #636366;
             background: #1f1f24;
         }
-
-        .friend-card .name {
-            font-size: 13px;
-            font-weight: 500;
+        .photo-card .name {
+            font-size: 11px;
             color: #aeaeb2;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .photo-card.you { border-color: rgba(255,214,10,0.2); background: rgba(255,214,10,0.04); }
 
-        .friend-card .photo-count {
-            font-size: 11px;
-            color: #636366;
-            margin-top: 2px;
-        }
-
-        .friend-card.you {
-            border-color: rgba(255, 214, 10, 0.2);
-            background: rgba(255, 214, 10, 0.04);
-        }
-
-        /* ─── Template Selector ─── */
-        .template-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 12px;
-            margin: 16px 0 20px;
-        }
-
-        .template-option {
-            background: rgba(255, 255, 255, 0.04);
-            border: 2px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px;
-            padding: 12px 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: border 0.2s, background 0.2s;
-            font-family: inherit;
-            color: #f5f5f7;
-            font-size: 12px;
-        }
-
-        .template-option:hover {
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        .template-option.active {
-            border-color: #ffd60a;
-            background: rgba(255, 214, 10, 0.08);
-        }
-
-        .template-option .preview {
-            font-size: 32px;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .template-option .label {
-            font-weight: 500;
-            font-size: 12px;
-            color: #aeaeb2;
-        }
-
-        /* ─── Status / Info ─── */
+        /* ─── Status ─── */
         .status-bar {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255,255,255,0.04);
             border-radius: 16px;
-            padding: 12px 18px;
+            padding: 10px 16px;
             font-size: 14px;
             color: #8e8e93;
             display: flex;
@@ -493,1041 +315,941 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 8px;
-            margin-top: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: 12px;
+            border: 1px solid rgba(255,255,255,0.04);
         }
-
         .status-bar .users {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
-
         .status-bar .users .user-badge {
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255,255,255,0.06);
             padding: 4px 12px;
             border-radius: 100px;
             font-size: 12px;
             color: #aeaeb2;
         }
+        .status-bar .users .user-badge.you { color:#ffd60a; border-color: rgba(255,214,10,0.2); }
 
-        .status-bar .users .user-badge.you {
-            color: #ffd60a;
-            border-color: rgba(255, 214, 10, 0.2);
+        /* ─── Final View ─── */
+        .template-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+            gap: 10px;
+            margin: 12px 0;
         }
-
-        /* ─── Responsive ─── */
-        @media (max-width: 600px) {
-            #app {
-                padding: 16px 14px 20px;
-                border-radius: 28px;
-            }
-
-            .app-header h1 {
-                font-size: 18px;
-            }
-            .app-header .room-badge {
-                font-size: 11px;
-                padding: 4px 12px;
-            }
-
-            #joinView h2 {
-                font-size: 24px;
-            }
-            #joinView .icon-big {
-                font-size: 56px;
-            }
-
-            .friends-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-                gap: 10px;
-            }
-
-            .template-selector {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-                gap: 8px;
-            }
-
-            .cam-controls .btn-capture {
-                width: 60px;
-                height: 60px;
-            }
-            .cam-controls .btn-capture .inner {
-                width: 44px;
-                height: 44px;
-                font-size: 22px;
-            }
-
-            #cameraView .camera-wrapper {
-                border-radius: 16px;
-                max-height: 360px;
-            }
-
-            .status-bar {
-                font-size: 12px;
-                padding: 10px 14px;
-            }
-        }
-
-        @media (max-width: 420px) {
-            .friends-grid {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-                gap: 8px;
-            }
-            .friend-card .name {
-                font-size: 11px;
-            }
-            .template-selector {
-                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            }
-        }
-
-        /* ─── Utility ─── */
-        .mt-8 {
-            margin-top: 8px;
-        }
-        .mt-12 {
-            margin-top: 12px;
-        }
-        .mt-16 {
-            margin-top: 16px;
-        }
-        .mb-8 {
-            margin-bottom: 8px;
-        }
-        .gap-8 {
-            gap: 8px;
-        }
-        .flex-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .flex-wrap {
-            flex-wrap: wrap;
-        }
-        .text-center {
+        .template-option {
+            background: rgba(255,255,255,0.04);
+            border: 2px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 10px 4px;
             text-align: center;
+            cursor: pointer;
+            font-family: inherit;
+            color: #f5f5f7;
+            font-size: 12px;
+            transition: border 0.2s;
         }
-        .text-muted {
-            color: #8e8e93;
-            font-size: 14px;
+        .template-option:hover { background: rgba(255,255,255,0.07); }
+        .template-option.active { border-color: #ffd60a; background: rgba(255,214,10,0.08); }
+        .template-option .preview { font-size: 28px; display:block; margin-bottom:2px; }
+        .template-option .label { font-weight:500; color:#aeaeb2; }
+
+        .strip-preview {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0;
         }
-        .w-full {
-            width: 100%;
+        .strip-preview canvas {
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+            max-width: 100%;
+            max-height: 500px;
+            background: #1a1a1f;
+            border: 1px solid rgba(255,255,255,0.06);
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .flex-center { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; }
+        .mt-8 { margin-top:8px; }
+        .mt-12 { margin-top:12px; }
+        .mt-16 { margin-top:16px; }
+        .mb-8 { margin-bottom:8px; }
+        .text-muted { color:#8e8e93; font-size:14px; }
+        .text-center { text-align:center; }
+        .hidden { display:none!important; }
 
-        /* scrollbar */
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #3a3a3f;
-            border-radius: 10px;
+        @media (max-width: 600px) {
+            #app { padding: 16px 12px 20px; border-radius:28px; }
+            .video-grid { grid-template-columns:1fr; }
+            .video-grid .video-box { aspect-ratio:4/3; }
+            .app-header h1 { font-size:18px; }
+            .cam-controls .btn-capture { width:60px; height:60px; }
+            .cam-controls .btn-capture .inner { width:44px; height:44px; font-size:22px; }
+            .photo-grid { grid-template-columns: repeat(auto-fill, minmax(70px,1fr)); }
         }
     </style>
 </head>
-
 <body>
 
-    <div id="app">
-        <!-- HEADER -->
-        <header class="app-header">
-            <h1>📸 TogetherBooth</h1>
-            <div class="room-badge">
-                <span class="dot"></span>
-                <span id="roomDisplay">—</span>
+<div id="app">
+    <header class="app-header">
+        <h1>📸 TogetherBooth</h1>
+        <div class="room-badge"><span class="dot"></span><span id="roomDisplay">—</span></div>
+    </header>
+
+    <!-- JOIN VIEW -->
+    <div id="joinView" class="view active">
+        <div class="icon-big">🤳</div>
+        <h2>Photo Booth, Together</h2>
+        <p>Real‑time video &amp; synced captures for you &amp; your partner</p>
+        <div class="join-form">
+            <input type="text" id="roomInput" placeholder="Room name" value="couple" />
+            <input type="text" id="nameInput" placeholder="Your name" value="You" />
+            <button class="btn-primary" id="joinBtn">✨ Join the Booth</button>
+        </div>
+        <div class="mt-16 text-muted" style="font-size:13px;">Works on iPhone, Mac, any browser with camera</div>
+    </div>
+
+    <!-- CAMERA VIEW -->
+    <div id="cameraView" class="view">
+        <!-- Video grid: local + remote -->
+        <div class="video-grid" id="videoGrid">
+            <div class="video-box" id="localVideoBox">
+                <video id="localVideo" autoplay playsinline muted></video>
+                <div class="label" id="localLabel">📷 You</div>
+                <div class="countdown-overlay" id="localCountdown"></div>
+                <div class="flash" id="localFlash"></div>
             </div>
-        </header>
-
-        <!-- ─── JOIN VIEW ─── -->
-        <div id="joinView" class="view active">
-            <div class="icon-big">🤳</div>
-            <h2>Photo Booth, Together</h2>
-            <p>Grab your friends and strike a pose — all in one strip.</p>
-
-            <div class="join-form">
-                <input type="text" id="roomInput" placeholder="Room name (e.g. squad)" value="squad" autofocus />
-                <input type="text" id="nameInput" placeholder="Your name" value="You" />
-                <button class="btn-primary" id="joinBtn">✨ Join the Booth</button>
-            </div>
-
-            <div class="mt-16 text-muted" style="font-size:13px;">
-                Works on iPhone, Mac, and any browser with a camera.
+            <div class="video-box" id="remoteVideoBox">
+                <video id="remoteVideo" autoplay playsinline></video>
+                <div class="label" id="remoteLabel">👤 Friend</div>
+                <div class="countdown-overlay" id="remoteCountdown"></div>
+                <div class="flash" id="remoteFlash"></div>
             </div>
         </div>
 
-        <!-- ─── CAMERA VIEW ─── -->
-        <div id="cameraView" class="view">
-            <!-- Camera feed -->
-            <div class="camera-wrapper">
-                <video id="video" autoplay playsinline muted></video>
-                <div class="cam-overlay"></div>
-                <div class="countdown" id="countdownDisplay"></div>
-                <div class="flash" id="flashOverlay"></div>
-            </div>
-
-            <!-- Controls -->
-            <div class="cam-controls">
-                <button class="btn-secondary" id="backToJoinBtn" style="padding:12px 18px; font-size:20px;">←</button>
-                <button class="btn-capture" id="captureBtn">
-                    <span class="inner">📷</span>
-                </button>
-                <button class="btn-secondary" id="nextStepBtn" style="padding:12px 18px; font-size:20px;">→</button>
-            </div>
-
-            <div class="cam-actions">
-                <button class="btn-secondary" id="switchCamBtn">🔄 Flip</button>
-                <button class="btn-secondary" id="toggleFlashBtn">💡 Flash</button>
-                <button class="btn-danger" id="clearPhotosBtn">🗑️ Clear</button>
-            </div>
-
-            <!-- My photos -->
-            <div class="mt-12">
-                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                    <span style="font-size:14px; font-weight:500; color:#aeaeb2;">📸 My photos</span>
-                    <span id="myPhotoCount" style="font-size:13px; color:#636366;">0</span>
-                    <span style="font-size:12px; color:#636366; margin-left:auto;">max 6</span>
-                </div>
-                <div class="friends-grid" id="myPhotosGrid" style="grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));">
-                    <!-- dynamically filled -->
-                </div>
-            </div>
-
-            <!-- Friends -->
-            <div class="mt-12">
-                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                    <span style="font-size:14px; font-weight:500; color:#aeaeb2;">👥 Friends</span>
-                    <span id="friendCount" style="font-size:13px; color:#636366;">0</span>
-                </div>
-                <div class="friends-grid" id="friendsGrid">
-                    <!-- dynamically filled -->
-                </div>
-            </div>
-
-            <!-- Status -->
-            <div class="status-bar">
-                <span id="statusText">📷 Ready</span>
-                <span id="roomUsersBadge" class="users"></span>
-            </div>
+        <!-- Controls -->
+        <div class="cam-controls">
+            <button class="btn-secondary" id="backToJoinBtn" style="padding:12px 18px; font-size:20px;">←</button>
+            <button class="btn-capture" id="captureBtn">
+                <span class="inner">📷</span>
+            </button>
+            <button class="btn-secondary" id="nextStepBtn" style="padding:12px 18px; font-size:20px;">→</button>
         </div>
 
-        <!-- ─── FINAL VIEW ─── -->
-        <div id="finalView" class="view">
-            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
-                <h2 style="font-size:22px; font-weight:700;">🖼️ Your Photostrip</h2>
-                <span style="font-size:13px; color:#636366;">pick a template</span>
-            </div>
+        <div class="cam-actions">
+            <button class="btn-secondary" id="switchCamBtn">🔄 Flip</button>
+            <button class="btn-secondary" id="toggleFlashBtn">💡 Flash</button>
+            <button class="btn-secondary" id="syncCountdownBtn">⏱️ Start Countdown</button>
+            <button class="btn-danger" id="clearPhotosBtn">🗑️ Clear</button>
+        </div>
 
-            <!-- Template selector -->
-            <div class="template-selector" id="templateSelector">
-                <button class="template-option active" data-template="strip4">
-                    <span class="preview">▌▌▌▌</span>
-                    <span class="label">4-strip</span>
-                </button>
-                <button class="template-option" data-template="strip6">
-                    <span class="preview">▌▌▌▌▌▌</span>
-                    <span class="label">6-strip</span>
-                </button>
-                <button class="template-option" data-template="grid2x2">
-                    <span class="preview">⊞⊞<br>⊞⊞</span>
-                    <span class="label">2×2 grid</span>
-                </button>
-                <button class="template-option" data-template="grid3x2">
-                    <span class="preview">⊞⊞⊞<br>⊞⊞⊞</span>
-                    <span class="label">3×2 grid</span>
-                </button>
-                <button class="template-option" data-template="polaroid">
-                    <span class="preview">🖼️</span>
-                    <span class="label">Polaroid</span>
-                </button>
+        <!-- My Photos -->
+        <div class="mt-12">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span style="font-size:14px; font-weight:500; color:#aeaeb2;">📸 My photos</span>
+                <span id="myPhotoCount" style="font-size:13px; color:#636366;">0</span>
+                <span style="font-size:12px; color:#636366; margin-left:auto;">max 6</span>
             </div>
+            <div class="photo-grid" id="myPhotosGrid"></div>
+        </div>
 
-            <!-- Final strip -->
-            <div class="strip-preview">
-                <canvas id="finalCanvas" width="600" height="800"></canvas>
+        <!-- Friends' Photos -->
+        <div class="mt-12">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <span style="font-size:14px; font-weight:500; color:#aeaeb2;">👥 Friends</span>
+                <span id="friendCount" style="font-size:13px; color:#636366;">0</span>
             </div>
+            <div class="photo-grid" id="friendsGrid"></div>
+        </div>
 
-            <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
-                <button class="btn-primary" id="downloadBtn">⬇️ Download PNG</button>
-                <button class="btn-secondary" id="backToCameraBtn">📷 Back to Camera</button>
-                <button class="btn-secondary" id="shareRoomBtn">🔗 Copy Room Link</button>
-            </div>
-
-            <div class="status-bar mt-12">
-                <span id="finalStatus">All friends' photos will be used. Take more photos to fill the strip!</span>
-            </div>
+        <!-- Status -->
+        <div class="status-bar">
+            <span id="statusText">📷 Ready</span>
+            <span id="roomUsersBadge" class="users"></span>
         </div>
     </div>
 
-    <script>
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  STATE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        const state = {
-            room: '',
-            name: '',
-            userId: '',
-            photos: [], // { id, dataURL, name, userId }
-            myPhotos: [], // local dataURLs
-            friends: {}, // userId -> { name, photos: [dataURL] }
-            stream: null,
-            isCapturing: false,
-            currentTemplate: 'strip4',
-            useFrontCamera: true,
-            flashEnabled: false,
+    <!-- FINAL VIEW -->
+    <div id="finalView" class="view">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+            <h2 style="font-size:22px; font-weight:700;">🖼️ Your Photostrip</h2>
+            <span style="font-size:13px; color:#636366;">pick a template</span>
+        </div>
+        <div class="template-selector" id="templateSelector">
+            <button class="template-option active" data-template="strip4"><span class="preview">▌▌▌▌</span><span class="label">4‑strip</span></button>
+            <button class="template-option" data-template="strip6"><span class="preview">▌▌▌▌▌▌</span><span class="label">6‑strip</span></button>
+            <button class="template-option" data-template="grid2x2"><span class="preview">⊞⊞<br>⊞⊞</span><span class="label">2×2</span></button>
+            <button class="template-option" data-template="grid3x2"><span class="preview">⊞⊞⊞<br>⊞⊞⊞</span><span class="label">3×2</span></button>
+            <button class="template-option" data-template="polaroid"><span class="preview">🖼️</span><span class="label">Polaroid</span></button>
+        </div>
+        <div class="strip-preview"><canvas id="finalCanvas" width="600" height="800"></canvas></div>
+        <div class="flex-center">
+            <button class="btn-primary" id="downloadBtn">⬇️ Download PNG</button>
+            <button class="btn-secondary" id="backToCameraBtn">📷 Back</button>
+            <button class="btn-secondary" id="shareRoomBtn">🔗 Copy Link</button>
+        </div>
+        <div class="status-bar mt-12"><span id="finalStatus">All photos will be combined.</span></div>
+    </div>
+</div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// STATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const state = {
+    room: '',
+    name: '',
+    userId: '',
+    myPhotos: [],          // dataURLs
+    friends: {},           // userId -> { name, photos: [dataURL] }
+    stream: null,
+    useFrontCamera: true,
+    flashEnabled: false,
+    currentTemplate: 'strip4',
+    // WebRTC
+    peerConnections: {},   // targetId -> RTCPeerConnection
+    remoteStreams: {},     // targetId -> MediaStream
+    remoteVideoElements: {}, // targetId -> HTMLVideoElement
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DOM refs
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const $ = id => document.getElementById(id);
+const joinView = $('joinView');
+const cameraView = $('cameraView');
+const finalView = $('finalView');
+const localVideo = $('localVideo');
+const remoteVideo = $('remoteVideo');
+const localCountdown = $('localCountdown');
+const remoteCountdown = $('remoteCountdown');
+const localFlash = $('localFlash');
+const remoteFlash = $('remoteFlash');
+const localLabel = $('localLabel');
+const remoteLabel = $('remoteLabel');
+const remoteVideoBox = $('remoteVideoBox');
+
+const captureBtn = $('captureBtn');
+const switchCamBtn = $('switchCamBtn');
+const toggleFlashBtn = $('toggleFlashBtn');
+const clearPhotosBtn = $('clearPhotosBtn');
+const syncCountdownBtn = $('syncCountdownBtn');
+const backToJoinBtn = $('backToJoinBtn');
+const nextStepBtn = $('nextStepBtn');
+const backToCameraBtn = $('backToCameraBtn');
+
+const roomInput = $('roomInput');
+const nameInput = $('nameInput');
+const joinBtn = $('joinBtn');
+const roomDisplay = $('roomDisplay');
+const statusText = $('statusText');
+const roomUsersBadge = $('roomUsersBadge');
+const friendCount = $('friendCount');
+const myPhotoCount = $('myPhotoCount');
+const friendsGrid = $('friendsGrid');
+const myPhotosGrid = $('myPhotosGrid');
+
+const templateSelector = $('templateSelector');
+const finalCanvas = $('finalCanvas');
+const downloadBtn = $('downloadBtn');
+const shareRoomBtn = $('shareRoomBtn');
+const finalStatus = $('finalStatus');
+
+let socket = null;
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SOCKET.IO
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function connectSocket(room, name) {
+    socket = io({ reconnection: true });
+    socket.on('connect', () => {
+        state.userId = socket.id;
+        socket.emit('join', { room, name });
+    });
+
+    socket.on('room_state', (data) => {
+        state.friends = {};
+        for (const [id, user] of Object.entries(data.users)) {
+            state.friends[id] = { name: user.name, photos: user.photos || [] };
+        }
+        renderFriends();
+        updateStatus();
+        updateFinalStrip();
+        // initiate WebRTC calls to existing users (except self)
+        for (const [id, _] of Object.entries(state.friends)) {
+            if (id !== state.userId) {
+                createPeerConnection(id, true);
+            }
+        }
+    });
+
+    socket.on('user_joined', (data) => {
+        const { userId, name } = data;
+        if (userId === state.userId) return;
+        state.friends[userId] = { name, photos: [] };
+        renderFriends();
+        updateStatus();
+        statusText.textContent = `👋 ${name} joined!`;
+        setTimeout(() => updateStatus(), 2000);
+        // initiate call to this new user
+        createPeerConnection(userId, true);
+    });
+
+    socket.on('user_left', (data) => {
+        const { userId } = data;
+        delete state.friends[userId];
+        closePeerConnection(userId);
+        renderFriends();
+        updateStatus();
+        updateFinalStrip();
+    });
+
+    socket.on('peer_disconnected', ({ userId }) => {
+        closePeerConnection(userId);
+    });
+
+    socket.on('user_photo', (data) => {
+        const { userId, photoData, name } = data;
+        if (userId === state.userId) return;
+        if (!state.friends[userId]) state.friends[userId] = { name: name || 'Friend', photos: [] };
+        const friend = state.friends[userId];
+        friend.photos.push(photoData);
+        if (friend.photos.length > 6) friend.photos.shift();
+        renderFriends();
+        updateStatus();
+        updateFinalStrip();
+    });
+
+    socket.on('user_cleared', (data) => {
+        const { userId } = data;
+        if (userId === state.userId) {
+            state.myPhotos = [];
+            renderMyPhotos();
+            updateStatus();
+            updateFinalStrip();
+            return;
+        }
+        if (state.friends[userId]) {
+            state.friends[userId].photos = [];
+            renderFriends();
+            updateFinalStrip();
+        }
+    });
+
+    // WebRTC signalling
+    socket.on('signal', ({ from, signal }) => {
+        handleSignal(from, signal);
+    });
+
+    // Synchronised countdown
+    socket.on('countdown_start', ({ delay, from }) => {
+        // start countdown on all devices except the one that triggered it (optional)
+        // but we want everyone to see it
+        startGlobalCountdown(delay);
+    });
+
+    socket.on('disconnect', () => {
+        statusText.textContent = '⚠️ Disconnected — reconnecting…';
+    });
+
+    return socket;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// WEBCAM
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function startCamera(front = true) {
+    try {
+        if (state.stream) {
+            state.stream.getTracks().forEach(t => t.stop());
+        }
+        const constraints = {
+            video: { facingMode: front ? 'user' : 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: false,
         };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        state.stream = stream;
+        localVideo.srcObject = stream;
+        await localVideo.play();
+        statusText.textContent = '📷 Camera ready';
+        return true;
+    } catch (err) {
+        statusText.textContent = '⚠️ Camera unavailable';
+        alert('Camera access required.');
+        return false;
+    }
+}
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  DOM REFS
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        const $ = (sel) => document.querySelector(sel);
-        const $$ = (sel) => document.querySelectorAll(sel);
+function stopCamera() {
+    if (state.stream) {
+        state.stream.getTracks().forEach(t => t.stop());
+        state.stream = null;
+        localVideo.srcObject = null;
+    }
+}
 
-        const joinView = $('#joinView');
-        const cameraView = $('#cameraView');
-        const finalView = $('#finalView');
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// WEBRTC
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        const video = $('#video');
-        const countdownDisplay = $('#countdownDisplay');
-        const flashOverlay = $('#flashOverlay');
-        const captureBtn = $('#captureBtn');
-        const switchCamBtn = $('#switchCamBtn');
-        const toggleFlashBtn = $('#toggleFlashBtn');
-        const clearPhotosBtn = $('#clearPhotosBtn');
-        const backToJoinBtn = $('#backToJoinBtn');
-        const nextStepBtn = $('#nextStepBtn');
-        const backToCameraBtn = $('#backToCameraBtn');
+function createPeerConnection(targetId, initiator = false) {
+    if (state.peerConnections[targetId]) {
+        // already exists
+        return state.peerConnections[targetId];
+    }
 
-        const roomInput = $('#roomInput');
-        const nameInput = $('#nameInput');
-        const joinBtn = $('#joinBtn');
+    const pc = new RTCPeerConnection(iceServers);
+    state.peerConnections[targetId] = pc;
 
-        const roomDisplay = $('#roomDisplay');
-        const statusText = $('#statusText');
-        const roomUsersBadge = $('#roomUsersBadge');
-        const friendCount = $('#friendCount');
-        const myPhotoCount = $('#myPhotoCount');
-        const friendsGrid = $('#friendsGrid');
-        const myPhotosGrid = $('#myPhotosGrid');
+    // Add local tracks
+    if (state.stream) {
+        state.stream.getTracks().forEach(track => {
+            pc.addTrack(track, state.stream);
+        });
+    }
 
-        const templateSelector = $('#templateSelector');
-        const finalCanvas = $('#finalCanvas');
-        const downloadBtn = $('#downloadBtn');
-        const shareRoomBtn = $('#shareRoomBtn');
-        const finalStatus = $('#finalStatus');
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  SOCKET.IO
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        let socket = null;
-
-        function connectSocket(room, name) {
-            socket = io({
-                reconnection: true,
-                reconnectionAttempts: 5,
-                reconnectionDelay: 1000,
-            });
-
-            socket.on('connect', () => {
-                state.userId = socket.id;
-                socket.emit('join', { room, name });
-                console.log('🔗 Connected, ID:', socket.id);
-            });
-
-            socket.on('room_state', (data) => {
-                // data: { users: { userId: { name, photos: [dataURL] } } }
-                state.friends = {};
-                for (const [id, user] of Object.entries(data.users)) {
-                    state.friends[id] = {
-                        name: user.name,
-                        photos: user.photos || [],
-                    };
-                }
-                // Remove self from friends
-                if (state.friends[state.userId]) {
-                    // Keep it for display but mark as "you"
-                }
-                renderFriends();
-                updateStatus();
-                updateFinalStrip();
-            });
-
-            socket.on('user_joined', (data) => {
-                const { userId, name } = data;
-                if (userId === state.userId) return;
-                state.friends[userId] = { name, photos: [] };
-                renderFriends();
-                updateStatus();
-                statusText.textContent = `👋 ${name} joined!`;
-                setTimeout(() => updateStatus(), 2000);
-            });
-
-            socket.on('user_left', (data) => {
-                const { userId } = data;
-                delete state.friends[userId];
-                renderFriends();
-                updateStatus();
-                updateFinalStrip();
-            });
-
-            socket.on('user_photo', (data) => {
-                const { userId, photoData, name } = data;
-                if (userId === state.userId) {
-                    // our own photo is handled locally
-                    return;
-                }
-                if (!state.friends[userId]) {
-                    state.friends[userId] = { name: name || 'Friend', photos: [] };
-                }
-                // Add photo (keep last 6)
-                const friend = state.friends[userId];
-                friend.photos.push(photoData);
-                if (friend.photos.length > 6) friend.photos.shift();
-                renderFriends();
-                updateStatus();
-                updateFinalStrip();
-            });
-
-            socket.on('user_cleared', (data) => {
-                const { userId } = data;
-                if (userId === state.userId) {
-                    state.myPhotos = [];
-                    renderMyPhotos();
-                    updateStatus();
-                    updateFinalStrip();
-                    return;
-                }
-                if (state.friends[userId]) {
-                    state.friends[userId].photos = [];
-                    renderFriends();
-                    updateFinalStrip();
-                }
-            });
-
-            socket.on('disconnect', () => {
-                statusText.textContent = '⚠️ Disconnected — reconnecting…';
-            });
-
-            socket.on('reconnect', () => {
-                statusText.textContent = '🔄 Reconnected!';
-                socket.emit('join', { room, name });
-            });
-
-            return socket;
+    // Handle remote tracks
+    pc.ontrack = (event) => {
+        const [stream] = event.streams;
+        if (!state.remoteStreams[targetId]) {
+            state.remoteStreams[targetId] = stream;
+            // assign to remote video element
+            const label = state.friends[targetId]?.name || 'Friend';
+            // We have only one remote video element in this UI, but we can show one remote at a time.
+            // For more, we would create new elements. For simplicity, show the first remote.
+            // However, for a couple, we can just show the one remote.
+            // We'll set remoteVideo.srcObject = stream;
+            remoteVideo.srcObject = stream;
+            remoteLabel.textContent = `👤 ${label}`;
+            remoteVideoBox.style.display = 'block';
+            remoteVideo.play().catch(()=>{});
         }
+    };
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  CAMERA
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        async function startCamera(front = true) {
-            try {
-                if (state.stream) {
-                    state.stream.getTracks().forEach(t => t.stop());
-                }
-                const constraints = {
-                    video: {
-                        facingMode: front ? 'user' : 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 960 },
-                    },
-                    audio: false,
-                };
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                state.stream = stream;
-                video.srcObject = stream;
-                await video.play();
-                statusText.textContent = '📷 Camera ready';
-                return true;
-            } catch (err) {
-                console.error('Camera error:', err);
-                statusText.textContent = '⚠️ Camera unavailable — check permissions';
-                alert('Camera access is required. Please allow camera access and refresh.');
-                return false;
-            }
+    pc.onicecandidate = (event) => {
+        if (event.candidate) {
+            socket.emit('signal', { targetId, signal: { type: 'candidate', candidate: event.candidate } });
         }
+    };
 
-        function stopCamera() {
-            if (state.stream) {
-                state.stream.getTracks().forEach(t => t.stop());
-                state.stream = null;
-                video.srcObject = null;
-            }
+    pc.oniceconnectionstatechange = () => {
+        if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+            closePeerConnection(targetId);
         }
+    };
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  CAPTURE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        function capturePhoto() {
-            if (state.isCapturing) return;
-            if (state.myPhotos.length >= 6) {
-                statusText.textContent = '⚠️ Max 6 photos per person';
-                return;
-            }
+    if (initiator) {
+        // Create offer
+        pc.createOffer()
+            .then(offer => pc.setLocalDescription(offer))
+            .then(() => {
+                socket.emit('signal', { targetId, signal: { type: 'offer', sdp: pc.localDescription } });
+            })
+            .catch(err => console.warn('Offer error:', err));
+    }
 
-            state.isCapturing = true;
-            captureBtn.disabled = true;
+    return pc;
+}
 
-            // Countdown
-            let count = 3;
-            countdownDisplay.textContent = count;
-            countdownDisplay.classList.add('show');
+function closePeerConnection(targetId) {
+    const pc = state.peerConnections[targetId];
+    if (pc) {
+        pc.close();
+        delete state.peerConnections[targetId];
+    }
+    if (state.remoteStreams[targetId]) {
+        delete state.remoteStreams[targetId];
+    }
+    // If remote video element is showing this peer, clear it
+    if (remoteVideo.srcObject && remoteVideo.srcObject === state.remoteStreams[targetId]) {
+        remoteVideo.srcObject = null;
+        remoteVideoBox.style.display = 'none';
+        remoteLabel.textContent = '👤 Friend';
+    }
+}
 
-            const timer = setInterval(() => {
-                count -= 1;
-                if (count <= 0) {
-                    clearInterval(timer);
-                    countdownDisplay.classList.remove('show');
-                    // Snap!
-                    doCapture();
-                } else {
-                    countdownDisplay.textContent = count;
-                }
-            }, 500);
+function handleSignal(from, signal) {
+    const pc = state.peerConnections[from];
+    if (!pc) {
+        // create a peer connection if not exists, but only if we have stream
+        if (!state.stream) return;
+        createPeerConnection(from, false);
+        // but we need to re-enter this function after creation? We'll just call again.
+        setTimeout(() => handleSignal(from, signal), 100);
+        return;
+    }
+
+    if (signal.type === 'offer') {
+        pc.setRemoteDescription(new RTCSessionDescription(signal.sdp))
+            .then(() => pc.createAnswer())
+            .then(answer => pc.setLocalDescription(answer))
+            .then(() => {
+                socket.emit('signal', { targetId: from, signal: { type: 'answer', sdp: pc.localDescription } });
+            })
+            .catch(err => console.warn('Answer error:', err));
+    } else if (signal.type === 'answer') {
+        pc.setRemoteDescription(new RTCSessionDescription(signal.sdp))
+            .catch(err => console.warn('Set remote desc error:', err));
+    } else if (signal.type === 'candidate') {
+        pc.addIceCandidate(new RTCIceCandidate(signal.candidate))
+            .catch(err => console.warn('Add ICE error:', err));
+    }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CAPTURE (local)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function capturePhoto() {
+    if (state.myPhotos.length >= 6) {
+        statusText.textContent = '⚠️ Max 6 photos per person';
+        return;
+    }
+    // Flash effect on local
+    if (state.flashEnabled) {
+        localFlash.classList.add('go');
+        setTimeout(() => localFlash.classList.remove('go'), 150);
+    }
+
+    const canvas = document.createElement('canvas');
+    const vw = localVideo.videoWidth || 1280;
+    const vh = localVideo.videoHeight || 720;
+    canvas.width = vw;
+    canvas.height = vh;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(localVideo, 0, 0, vw, vh);
+    const dataURL = canvas.toDataURL('image/jpeg', 0.92);
+
+    state.myPhotos.push(dataURL);
+    if (state.myPhotos.length > 6) state.myPhotos.shift();
+    renderMyPhotos();
+    updateStatus();
+
+    socket.emit('photo', { photoData: dataURL });
+
+    statusText.textContent = `📸 Captured! (${state.myPhotos.length}/6)`;
+    updateFinalStrip();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SYNCHRONISED COUNTDOWN
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let countdownTimer = null;
+
+function startGlobalCountdown(delay = 3) {
+    if (countdownTimer) return; // already running
+    let count = delay;
+    // Show on both local and remote overlays
+    localCountdown.textContent = count;
+    remoteCountdown.textContent = count;
+    localCountdown.classList.add('show');
+    remoteCountdown.classList.add('show');
+
+    countdownTimer = setInterval(() => {
+        count -= 1;
+        if (count <= 0) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+            localCountdown.classList.remove('show');
+            remoteCountdown.classList.remove('show');
+            // Capture photo on this device
+            capturePhoto();
+            // Also flash on remote (simulate)
+            remoteFlash.classList.add('go');
+            setTimeout(() => remoteFlash.classList.remove('go'), 200);
+            statusText.textContent = '📸 Synced capture!';
+        } else {
+            localCountdown.textContent = count;
+            remoteCountdown.textContent = count;
         }
+    }, 1000);
+}
 
-        function doCapture() {
-            // Flash
-            if (state.flashEnabled) {
-                flashOverlay.classList.add('go');
-                setTimeout(() => flashOverlay.classList.remove('go'), 150);
-            }
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// RENDER: My Photos
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderMyPhotos() {
+    myPhotosGrid.innerHTML = '';
+    state.myPhotos.forEach((url, i) => {
+        const div = document.createElement('div');
+        div.className = 'photo-card you';
+        div.innerHTML = `<div class="avatar"><img src="${url}" alt="my ${i+1}" loading="lazy" /></div>
+                         <div class="name">#${i+1}</div>`;
+        myPhotosGrid.appendChild(div);
+    });
+    if (state.myPhotos.length === 0) {
+        const div = document.createElement('div');
+        div.className = 'photo-card';
+        div.style.opacity = '0.4';
+        div.innerHTML = `<div class="avatar"><div class="placeholder">📷</div></div><div class="name">Take a photo</div>`;
+        myPhotosGrid.appendChild(div);
+    }
+    myPhotoCount.textContent = state.myPhotos.length;
+}
 
-            const canvas = document.createElement('canvas');
-            const vw = video.videoWidth || 1280;
-            const vh = video.videoHeight || 960;
-            canvas.width = vw;
-            canvas.height = vh;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, vw, vh);
-            const dataURL = canvas.toDataURL('image/jpeg', 0.92);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// RENDER: Friends
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderFriends() {
+    friendsGrid.innerHTML = '';
+    let count = 0;
+    // Self
+    const selfDiv = document.createElement('div');
+    selfDiv.className = 'photo-card you';
+    const lastSelf = state.myPhotos.length > 0 ? state.myPhotos[state.myPhotos.length-1] : null;
+    selfDiv.innerHTML = `
+        <div class="avatar">${lastSelf ? `<img src="${lastSelf}" alt="you" />` : `<div class="placeholder">👤</div>`}</div>
+        <div class="name">${state.name} (you)</div>
+        <div class="name" style="font-size:10px;color:#636366;">${state.myPhotos.length} photos</div>
+    `;
+    friendsGrid.appendChild(selfDiv);
+    count++;
 
-            // Add to my photos
-            state.myPhotos.push(dataURL);
-            if (state.myPhotos.length > 6) state.myPhotos.shift();
-            renderMyPhotos();
-            updateStatus();
+    for (const [id, friend] of Object.entries(state.friends)) {
+        if (id === state.userId) continue;
+        const div = document.createElement('div');
+        div.className = 'photo-card';
+        const last = friend.photos.length > 0 ? friend.photos[friend.photos.length-1] : null;
+        div.innerHTML = `
+            <div class="avatar">${last ? `<img src="${last}" alt="${friend.name}" />` : `<div class="placeholder">👤</div>`}</div>
+            <div class="name">${friend.name}</div>
+            <div class="name" style="font-size:10px;color:#636366;">${friend.photos.length} photos</div>
+        `;
+        friendsGrid.appendChild(div);
+        count++;
+    }
+    friendCount.textContent = count;
+    updateRoomUsers();
+}
 
-            // Broadcast to room
-            if (socket) {
-                socket.emit('photo', { photoData: dataURL });
-            }
+function updateRoomUsers() {
+    const names = [state.name];
+    for (const [id, friend] of Object.entries(state.friends)) {
+        if (id === state.userId) continue;
+        names.push(friend.name);
+    }
+    const html = names.map(n => `<span class="user-badge${n === state.name ? ' you' : ''}">${n}</span>`).join('');
+    roomUsersBadge.innerHTML = html;
+}
 
-            statusText.textContent = `📸 Captured! (${state.myPhotos.length}/6)`;
+function updateStatus() {
+    const total = Object.keys(state.friends).length + 1;
+    statusText.textContent = `👥 ${total} in room · 📸 ${state.myPhotos.length} photos`;
+}
 
-            state.isCapturing = false;
-            captureBtn.disabled = false;
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FINAL STRIP
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getAllPhotos() {
+    const all = [];
+    for (const p of state.myPhotos) all.push({ dataURL: p, name: state.name, isSelf: true });
+    for (const [id, friend] of Object.entries(state.friends)) {
+        if (id === state.userId) continue;
+        for (const p of friend.photos) all.push({ dataURL: p, name: friend.name, isSelf: false });
+    }
+    return all;
+}
 
-            updateFinalStrip();
-        }
+function updateFinalStrip() {
+    const template = state.currentTemplate;
+    const photos = getAllPhotos();
+    if (photos.length === 0) {
+        finalStatus.textContent = '📸 No photos yet — take some!';
+        const ctx = finalCanvas.getContext('2d');
+        ctx.fillStyle = '#1a1a1f';
+        ctx.fillRect(0,0,finalCanvas.width,finalCanvas.height);
+        ctx.fillStyle = '#636366';
+        ctx.font = '20px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Take photos to see your strip ✨', finalCanvas.width/2, finalCanvas.height/2);
+        return;
+    }
+    finalStatus.textContent = `🖼️ ${photos.length} photos · template: ${template}`;
+    renderTemplate(template, photos);
+}
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  RENDER: My Photos
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        function renderMyPhotos() {
-            myPhotosGrid.innerHTML = '';
-            state.myPhotos.forEach((url, i) => {
-                const div = document.createElement('div');
-                div.className = 'friend-card you';
-                div.innerHTML = `
-              <div class="avatar"><img src="${url}" alt="my photo ${i+1}" loading="lazy" /></div>
-              <div class="name">📸 #${i+1}</div>
-            `;
-                myPhotosGrid.appendChild(div);
-            });
-            if (state.myPhotos.length === 0) {
-                const div = document.createElement('div');
-                div.className = 'friend-card';
-                div.style.opacity = '0.4';
-                div.innerHTML = `
-              <div class="avatar"><div class="placeholder">📷</div></div>
-              <div class="name">Take a photo</div>
-            `;
-                myPhotosGrid.appendChild(div);
-            }
-            myPhotoCount.textContent = state.myPhotos.length;
-        }
+function renderTemplate(template, photos) {
+    const canvas = finalCanvas;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  RENDER: Friends
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        function renderFriends() {
-            friendsGrid.innerHTML = '';
-            let count = 0;
+    function drawRoundedRect(ctx,x,y,w,h,r) {
+        ctx.beginPath();
+        ctx.moveTo(x+r,y);
+        ctx.arcTo(x+w,y,x+w,y+h,r);
+        ctx.arcTo(x+w,y+h,x,y+h,r);
+        ctx.arcTo(x,y+h,x,y,r);
+        ctx.arcTo(x,y,x+w,y,r);
+        ctx.closePath();
+    }
 
-            // Show self
-            const selfDiv = document.createElement('div');
-            selfDiv.className = 'friend-card you';
-            const selfPhoto = state.myPhotos.length > 0 ? state.myPhotos[state.myPhotos.length - 1] : null;
-            selfDiv.innerHTML = `
-            <div class="avatar">
-              ${selfPhoto ? `<img src="${selfPhoto}" alt="you" loading="lazy" />` : `<div class="placeholder">👤</div>`}
-            </div>
-            <div class="name">${state.name} (you)</div>
-            <div class="photo-count">${state.myPhotos.length} photos</div>
-          `;
-            friendsGrid.appendChild(selfDiv);
-            count++;
+    function drawPhoto(ctx, img, x, y, w, h, r=8) {
+        drawRoundedRect(ctx,x,y,w,h,r);
+        ctx.save();
+        ctx.clip();
+        ctx.drawImage(img,x,y,w,h);
+        ctx.restore();
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 1;
+        drawRoundedRect(ctx,x,y,w,h,r);
+        ctx.stroke();
+    }
 
-            // Show friends
-            for (const [id, friend] of Object.entries(state.friends)) {
-                if (id === state.userId) continue;
-                const div = document.createElement('div');
-                div.className = 'friend-card';
-                const lastPhoto = friend.photos.length > 0 ? friend.photos[friend.photos.length - 1] : null;
-                div.innerHTML = `
-              <div class="avatar">
-                ${lastPhoto ? `<img src="${lastPhoto}" alt="${friend.name}" loading="lazy" />` : `<div class="placeholder">👤</div>`}
-              </div>
-              <div class="name">${friend.name}</div>
-              <div class="photo-count">${friend.photos.length} photos</div>
-            `;
-                friendsGrid.appendChild(div);
-                count++;
-            }
+    function loadImage(url) { return new Promise(resolve => { const img = new Image(); img.onload = ()=>resolve(img); img.onerror=()=>resolve(null); img.src=url; }); }
 
-            friendCount.textContent = count;
-            updateRoomUsers();
-        }
+    const loadPromises = photos.map(p => loadImage(p.dataURL));
+    Promise.all(loadPromises).then(images => {
+        const valid = images.filter(img => img !== null);
+        if (valid.length === 0) return;
+        while (valid.length < 4) valid.push(valid[valid.length-1] || valid[0]);
+        const used = valid.slice(0,8);
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  STATUS
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        function updateStatus() {
-            const total = Object.keys(state.friends).length + 1; // + self
-            const photos = state.myPhotos.length;
-            statusText.textContent = `👥 ${total} in room · 📸 ${photos} photos`;
-        }
+        ctx.fillStyle = '#1a1a1f';
+        ctx.fillRect(0,0,W,H);
+        const pad = 24, gap = 10;
+        const innerW = W - pad*2, innerH = H - pad*2;
 
-        function updateRoomUsers() {
-            const names = [state.name];
-            for (const [id, friend] of Object.entries(state.friends)) {
-                if (id === state.userId) continue;
-                names.push(friend.name);
-            }
-            const html = names.map(n =>
-                `<span class="user-badge${n === state.name ? ' you' : ''}">${n}</span>`
-            ).join('');
-            roomUsersBadge.innerHTML = html;
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  FINAL STRIP — CANVAS RENDER
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        function getAllPhotos() {
-            // Collect all photos: self first, then friends
-            const all = [];
-            // Self photos
-            for (const p of state.myPhotos) {
-                all.push({ dataURL: p, name: state.name, isSelf: true });
-            }
-            // Friends photos
-            for (const [id, friend] of Object.entries(state.friends)) {
-                if (id === state.userId) continue;
-                for (const p of friend.photos) {
-                    all.push({ dataURL: p, name: friend.name, isSelf: false });
-                }
-            }
-            return all;
-        }
-
-        function updateFinalStrip() {
-            const template = state.currentTemplate;
-            const allPhotos = getAllPhotos();
-
-            if (allPhotos.length === 0) {
-                finalStatus.textContent = '📸 No photos yet — take some selfies with your friends!';
-                // Show a placeholder on canvas
-                const ctx = finalCanvas.getContext('2d');
-                ctx.fillStyle = '#1a1a1f';
-                ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-                ctx.fillStyle = '#636366';
-                ctx.font = '20px system-ui, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('Take photos to see your strip ✨', finalCanvas.width / 2, finalCanvas.height / 2);
-                return;
-            }
-
-            finalStatus.textContent = `🖼️ ${allPhotos.length} photos · template: ${template}`;
-            renderTemplate(template, allPhotos);
-        }
-
-        function renderTemplate(template, photos) {
-            const canvas = finalCanvas;
-            const ctx = canvas.getContext('2d');
-            const W = canvas.width;
-            const H = canvas.height;
-
-            // Clear
-            ctx.clearRect(0, 0, W, H);
-
-            // ─── Helpers ───
-            function drawRoundedRect(ctx, x, y, w, h, r) {
-                ctx.beginPath();
-                ctx.moveTo(x + r, y);
-                ctx.arcTo(x + w, y, x + w, y + h, r);
-                ctx.arcTo(x + w, y + h, x, y + h, r);
-                ctx.arcTo(x, y + h, x, y + h - r, r);
-                ctx.arcTo(x, y, x + w, y, r);
-                ctx.closePath();
-            }
-
-            function drawPhoto(ctx, img, x, y, w, h, r = 8) {
-                drawRoundedRect(ctx, x, y, w, h, r);
-                ctx.save();
-                ctx.clip();
-                ctx.drawImage(img, x, y, w, h);
-                ctx.restore();
-                // subtle border
-                ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-                ctx.lineWidth = 1;
-                drawRoundedRect(ctx, x, y, w, h, r);
-                ctx.stroke();
-            }
-
-            function loadImage(url) {
-                return new Promise((resolve) => {
-                    const img = new Image();
-                    img.onload = () => resolve(img);
-                    img.onerror = () => resolve(null);
-                    img.src = url;
-                });
-            }
-
-            // ─── Load all images ───
-            const loadPromises = photos.map(p => loadImage(p.dataURL));
-            Promise.all(loadPromises).then((images) => {
-                const valid = images.filter(img => img !== null);
-                if (valid.length === 0) return;
-
-                // Pad to at least 4 by repeating last
-                while (valid.length < 4) {
-                    valid.push(valid[valid.length - 1] || valid[0]);
-                }
-
-                // Slice to max 8
-                const used = valid.slice(0, 8);
-
-                ctx.fillStyle = '#1a1a1f';
-                ctx.fillRect(0, 0, W, H);
-
-                // ─── Template logic ───
-                const pad = 24;
-                const gap = 10;
-                const innerW = W - pad * 2;
-                const innerH = H - pad * 2;
-
-                if (template === 'strip4' || template === 'strip6') {
-                    const count = template === 'strip4' ? 4 : 6;
-                    const total = Math.min(used.length, count);
-                    const photoH = (innerH - (total - 1) * gap) / total;
-                    const photoW = innerW * 0.72;
-                    const offsetX = (W - photoW) / 2;
-
-                    // Background: subtle paper texture
-                    ctx.fillStyle = '#1e1e24';
-                    ctx.fillRect(0, 0, W, H);
-
-                    // Border
-                    ctx.strokeStyle = 'rgba(255,215,0,0.08)';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(pad, pad, innerW, innerH);
-
-                    // Title
-                    ctx.fillStyle = 'rgba(255,255,255,0.06)';
-                    ctx.font = '12px system-ui, sans-serif';
+        if (template === 'strip4' || template === 'strip6') {
+            const count = template === 'strip4' ? 4 : 6;
+            const total = Math.min(used.length, count);
+            const photoH = (innerH - (total-1)*gap) / total;
+            const photoW = innerW * 0.72;
+            const offsetX = (W - photoW) / 2;
+            ctx.fillStyle = '#1e1e24';
+            ctx.fillRect(0,0,W,H);
+            ctx.strokeStyle = 'rgba(255,215,0,0.08)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(pad,pad,innerW,innerH);
+            ctx.fillStyle = 'rgba(255,255,255,0.06)';
+            ctx.font = '12px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('📸 PHOTOBOOTH', W/2, 18);
+            for (let i=0; i<total; i++) {
+                const y = pad + i*(photoH+gap);
+                const img = used[i % used.length];
+                if (img) {
+                    drawPhoto(ctx, img, offsetX, y, photoW, photoH, 8);
+                    const label = photos[i % photos.length]?.name || '';
+                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                    ctx.font = '10px system-ui, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('📸 PHOTOBOOTH', W / 2, 18);
-
-                    for (let i = 0; i < total; i++) {
-                        const y = pad + i * (photoH + gap);
-                        const img = used[i % used.length];
-                        if (img) {
-                            drawPhoto(ctx, img, offsetX, y, photoW, photoH, 8);
-                            // Label
-                            const label = photos[i % photos.length]?.name || '';
-                            ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                            ctx.font = '10px system-ui, sans-serif';
-                            ctx.textAlign = 'center';
-                            ctx.fillText(label, W / 2, y + photoH + 14);
-                        }
-                    }
-
-                } else if (template === 'grid2x2') {
-                    const cols = 2,
-                        rows = 2;
-                    const total = Math.min(used.length, cols * rows);
-                    const cellW = (innerW - (cols - 1) * gap) / cols;
-                    const cellH = (innerH - (rows - 1) * gap) / rows;
-                    for (let i = 0; i < total; i++) {
-                        const r = Math.floor(i / cols);
-                        const c = i % cols;
-                        const x = pad + c * (cellW + gap);
-                        const y = pad + r * (cellH + gap);
-                        const img = used[i % used.length];
-                        if (img) {
-                            drawPhoto(ctx, img, x, y, cellW, cellH, 10);
-                        }
-                    }
-
-                } else if (template === 'grid3x2') {
-                    const cols = 3,
-                        rows = 2;
-                    const total = Math.min(used.length, cols * rows);
-                    const cellW = (innerW - (cols - 1) * gap) / cols;
-                    const cellH = (innerH - (rows - 1) * gap) / rows;
-                    for (let i = 0; i < total; i++) {
-                        const r = Math.floor(i / cols);
-                        const c = i % cols;
-                        const x = pad + c * (cellW + gap);
-                        const y = pad + r * (cellH + gap);
-                        const img = used[i % used.length];
-                        if (img) {
-                            drawPhoto(ctx, img, x, y, cellW, cellH, 10);
-                        }
-                    }
-
-                } else if (template === 'polaroid') {
-                    // Single large photo with polaroid border
-                    const mainImg = used[0];
-                    const photoW = innerW * 0.78;
-                    const photoH = photoW * 0.8;
-                    const x = (W - photoW) / 2;
-                    const y = pad + 30;
-
-                    // White polaroid border
-                    ctx.fillStyle = '#2a2a2f';
-                    const border = 14;
-                    const bw = photoW + border * 2;
-                    const bh = photoH + border * 2 + 40;
-                    const bx = x - border;
-                    const by = y - border;
-                    drawRoundedRect(ctx, bx, by, bw, bh, 6);
-                    ctx.fill();
-
-                    // Photo
-                    if (mainImg) {
-                        drawPhoto(ctx, mainImg, x, y, photoW, photoH, 4);
-                    }
-
-                    // Caption
-                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                    ctx.font = '12px system-ui, sans-serif';
-                    ctx.textAlign = 'center';
-                    const caption = photos[0]?.name || '📸';
-                    ctx.fillText(caption, W / 2, y + photoH + 28);
-
-                    // Small extra photos at bottom
-                    const extra = used.slice(1, 4);
-                    const thumbSize = 50;
-                    const spacing = 12;
-                    const totalW = extra.length * thumbSize + (extra.length - 1) * spacing;
-                    let sx = (W - totalW) / 2;
-                    const sy = y + photoH + 52;
-                    for (const img of extra) {
-                        if (img) {
-                            drawPhoto(ctx, img, sx, sy, thumbSize, thumbSize, 4);
-                            sx += thumbSize + spacing;
-                        }
-                    }
-                }
-
-                // ─── Footer ───
-                ctx.fillStyle = 'rgba(255,255,255,0.04)';
-                ctx.font = '10px system-ui, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('✦ togetherbooth.app ✦', W / 2, H - 8);
-
-            }).catch(err => {
-                console.warn('Render error:', err);
-            });
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  NAVIGATION
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        function showView(viewId) {
-            $$('.view').forEach(v => v.classList.remove('active'));
-            const el = document.getElementById(viewId);
-            if (el) el.classList.add('active');
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  JOIN
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        async function joinRoom() {
-            const room = roomInput.value.trim() || 'squad';
-            const name = nameInput.value.trim() || 'You';
-            state.room = room;
-            state.name = name;
-
-            roomDisplay.textContent = `#${room}`;
-
-            // Connect socket
-            connectSocket(room, name);
-
-            // Start camera
-            const ok = await startCamera(state.useFrontCamera);
-            if (!ok) return;
-
-            showView('cameraView');
-            renderMyPhotos();
-            renderFriends();
-            updateStatus();
-            updateFinalStrip();
-
-            // Auto-clear old state
-            state.myPhotos = [];
-            renderMyPhotos();
-            // Tell others we're here with no photos
-            if (socket) {
-                socket.emit('cleared');
-            }
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  EVENT BINDINGS
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        joinBtn.addEventListener('click', joinRoom);
-        roomInput.addEventListener('keydown', e => { if (e.key === 'Enter') joinBtn.click(); });
-        nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') joinBtn.click(); });
-
-        captureBtn.addEventListener('click', capturePhoto);
-
-        switchCamBtn.addEventListener('click', async () => {
-            state.useFrontCamera = !state.useFrontCamera;
-            await startCamera(state.useFrontCamera);
-            statusText.textContent = `🔄 ${state.useFrontCamera ? 'Front' : 'Back'} camera`;
-        });
-
-        toggleFlashBtn.addEventListener('click', () => {
-            state.flashEnabled = !state.flashEnabled;
-            toggleFlashBtn.textContent = state.flashEnabled ? '💡 On' : '💡 Flash';
-            toggleFlashBtn.style.borderColor = state.flashEnabled ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.08)';
-        });
-
-        clearPhotosBtn.addEventListener('click', () => {
-            if (state.myPhotos.length === 0) return;
-            if (!confirm('Clear all your photos?')) return;
-            state.myPhotos = [];
-            renderMyPhotos();
-            updateStatus();
-            updateFinalStrip();
-            if (socket) {
-                socket.emit('cleared');
-            }
-            statusText.textContent = '🗑️ Photos cleared';
-        });
-
-        backToJoinBtn.addEventListener('click', () => {
-            stopCamera();
-            if (socket) socket.disconnect();
-            showView('joinView');
-        });
-
-        nextStepBtn.addEventListener('click', () => {
-            const all = getAllPhotos();
-            if (all.length < 2) {
-                statusText.textContent = '⚠️ Need at least 2 photos total (you + friends)';
-                return;
-            }
-            showView('finalView');
-            updateFinalStrip();
-        });
-
-        backToCameraBtn.addEventListener('click', () => {
-            showView('cameraView');
-            // Re-render in case something changed
-            renderFriends();
-            renderMyPhotos();
-            updateFinalStrip();
-        });
-
-        // Template selector
-        templateSelector.addEventListener('click', (e) => {
-            const btn = e.target.closest('.template-option');
-            if (!btn) return;
-            $$('.template-option').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.currentTemplate = btn.dataset.template;
-            updateFinalStrip();
-        });
-
-        // Download
-        downloadBtn.addEventListener('click', () => {
-            const canvas = finalCanvas;
-            const link = document.createElement('a');
-            link.download = `photobooth-${state.room}-${Date.now()}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        });
-
-        // Share room link
-        shareRoomBtn.addEventListener('click', () => {
-            const url = `${window.location.origin}?room=${encodeURIComponent(state.room)}`;
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(url).then(() => {
-                    finalStatus.textContent = '✅ Room link copied! Share it with your friends.';
-                }).catch(() => {
-                    prompt('Copy this link:', url);
-                });
-            } else {
-                prompt('Copy this link:', url);
-            }
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  INIT — check URL param for room
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        (function init() {
-            const params = new URLSearchParams(window.location.search);
-            const room = params.get('room');
-            if (room) {
-                roomInput.value = room;
-                // Auto-join with a random name if not set
-                if (!nameInput.value || nameInput.value === 'You') {
-                    const names = ['Alex', 'Jordan', 'Taylor', 'Riley', 'Avery', 'Quinn', 'Parker', 'Sage'];
-                    nameInput.value = names[Math.floor(Math.random() * names.length)];
-                }
-                // Small delay then join
-                setTimeout(() => joinBtn.click(), 400);
-            }
-
-            // Pre-fill name
-            if (nameInput.value === 'You') {
-                const names = ['Alex', 'Jordan', 'Taylor', 'Riley', 'Avery', 'Quinn', 'Parker', 'Sage'];
-                nameInput.value = names[Math.floor(Math.random() * names.length)];
-            }
-        })();
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  KEYBOARD SHORTCUTS
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        document.addEventListener('keydown', (e) => {
-            if (e.key === ' ' && cameraView.classList.contains('active')) {
-                e.preventDefault();
-                captureBtn.click();
-            }
-            if (e.key === 'Escape') {
-                if (finalView.classList.contains('active')) {
-                    backToCameraBtn.click();
-                } else if (cameraView.classList.contains('active')) {
-                    backToJoinBtn.click();
+                    ctx.fillText(label, W/2, y+photoH+14);
                 }
             }
-        });
+        } else if (template === 'grid2x2') {
+            const cols=2, rows=2;
+            const total=Math.min(used.length, cols*rows);
+            const cellW=(innerW-(cols-1)*gap)/cols, cellH=(innerH-(rows-1)*gap)/rows;
+            for (let i=0; i<total; i++) {
+                const r=Math.floor(i/cols), c=i%cols;
+                const x=pad+c*(cellW+gap), y=pad+r*(cellH+gap);
+                const img=used[i%used.length];
+                if (img) drawPhoto(ctx, img, x, y, cellW, cellH, 10);
+            }
+        } else if (template === 'grid3x2') {
+            const cols=3, rows=2;
+            const total=Math.min(used.length, cols*rows);
+            const cellW=(innerW-(cols-1)*gap)/cols, cellH=(innerH-(rows-1)*gap)/rows;
+            for (let i=0; i<total; i++) {
+                const r=Math.floor(i/cols), c=i%cols;
+                const x=pad+c*(cellW+gap), y=pad+r*(cellH+gap);
+                const img=used[i%used.length];
+                if (img) drawPhoto(ctx, img, x, y, cellW, cellH, 10);
+            }
+        } else if (template === 'polaroid') {
+            const mainImg = used[0];
+            const photoW = innerW * 0.78;
+            const photoH = photoW * 0.8;
+            const x = (W - photoW)/2;
+            const y = pad + 30;
+            ctx.fillStyle = '#2a2a2f';
+            const border = 14;
+            const bw = photoW + border*2;
+            const bh = photoH + border*2 + 40;
+            const bx = x - border;
+            const by = y - border;
+            drawRoundedRect(ctx,bx,by,bw,bh,6);
+            ctx.fill();
+            if (mainImg) drawPhoto(ctx, mainImg, x, y, photoW, photoH, 4);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '12px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(photos[0]?.name || '📸', W/2, y+photoH+28);
+            const extra = used.slice(1,4);
+            const thumbSize = 50;
+            const spacing = 12;
+            const totalW = extra.length * thumbSize + (extra.length-1)*spacing;
+            let sx = (W - totalW)/2;
+            const sy = y + photoH + 52;
+            for (const img of extra) {
+                if (img) { drawPhoto(ctx, img, sx, sy, thumbSize, thumbSize, 4); sx += thumbSize + spacing; }
+            }
+        }
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        ctx.font = '10px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('✦ togetherbooth.app ✦', W/2, H-8);
+    });
+}
 
-        console.log('📸 TogetherBooth loaded!');
-        console.log('💡 Press SPACE to capture, ESC to go back.');
-    </script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// NAVIGATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showView(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// JOIN
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function joinRoom() {
+    const room = roomInput.value.trim() || 'couple';
+    const name = nameInput.value.trim() || 'You';
+    state.room = room;
+    state.name = name;
+    roomDisplay.textContent = `#${room}`;
+
+    connectSocket(room, name);
+    const ok = await startCamera(state.useFrontCamera);
+    if (!ok) return;
+
+    showView('cameraView');
+    renderMyPhotos();
+    renderFriends();
+    updateStatus();
+    updateFinalStrip();
+    state.myPhotos = [];
+    renderMyPhotos();
+    if (socket) socket.emit('cleared');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// EVENT BINDINGS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+joinBtn.addEventListener('click', joinRoom);
+roomInput.addEventListener('keydown', e => { if(e.key === 'Enter') joinBtn.click(); });
+nameInput.addEventListener('keydown', e => { if(e.key === 'Enter') joinBtn.click(); });
+
+captureBtn.addEventListener('click', capturePhoto);
+
+switchCamBtn.addEventListener('click', async () => {
+    state.useFrontCamera = !state.useFrontCamera;
+    await startCamera(state.useFrontCamera);
+    statusText.textContent = `🔄 ${state.useFrontCamera ? 'Front' : 'Back'} camera`;
+});
+
+toggleFlashBtn.addEventListener('click', () => {
+    state.flashEnabled = !state.flashEnabled;
+    toggleFlashBtn.textContent = state.flashEnabled ? '💡 On' : '💡 Flash';
+    toggleFlashBtn.style.borderColor = state.flashEnabled ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.08)';
+});
+
+clearPhotosBtn.addEventListener('click', () => {
+    if (state.myPhotos.length === 0) return;
+    if (!confirm('Clear all your photos?')) return;
+    state.myPhotos = [];
+    renderMyPhotos();
+    updateStatus();
+    updateFinalStrip();
+    socket.emit('cleared');
+    statusText.textContent = '🗑️ Photos cleared';
+});
+
+syncCountdownBtn.addEventListener('click', () => {
+    if (!socket) return;
+    // send start countdown to all
+    socket.emit('start_countdown', { delay: 3 });
+    // also start locally (the event will also come back, but we can start now to avoid lag)
+    startGlobalCountdown(3);
+});
+
+backToJoinBtn.addEventListener('click', () => {
+    stopCamera();
+    if (socket) socket.disconnect();
+    showView('joinView');
+});
+
+nextStepBtn.addEventListener('click', () => {
+    const all = getAllPhotos();
+    if (all.length < 2) {
+        statusText.textContent = '⚠️ Need at least 2 photos total';
+        return;
+    }
+    showView('finalView');
+    updateFinalStrip();
+});
+
+backToCameraBtn.addEventListener('click', () => {
+    showView('cameraView');
+    renderFriends();
+    renderMyPhotos();
+    updateFinalStrip();
+});
+
+templateSelector.addEventListener('click', (e) => {
+    const btn = e.target.closest('.template-option');
+    if (!btn) return;
+    document.querySelectorAll('.template-option').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.currentTemplate = btn.dataset.template;
+    updateFinalStrip();
+});
+
+downloadBtn.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = `photobooth-${state.room}-${Date.now()}.png`;
+    link.href = finalCanvas.toDataURL('image/png');
+    link.click();
+});
+
+shareRoomBtn.addEventListener('click', () => {
+    const url = `${window.location.origin}?room=${encodeURIComponent(state.room)}`;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            finalStatus.textContent = '✅ Room link copied!';
+        }).catch(() => prompt('Copy this link:', url));
+    } else {
+        prompt('Copy this link:', url);
+    }
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// INIT: auto-join if ?room=...
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const room = params.get('room');
+    if (room) {
+        roomInput.value = room;
+        if (nameInput.value === 'You') {
+            const names = ['Alex', 'Jordan', 'Taylor', 'Riley', 'Avery', 'Quinn', 'Parker', 'Sage'];
+            nameInput.value = names[Math.floor(Math.random() * names.length)];
+        }
+        setTimeout(() => joinBtn.click(), 500);
+    }
+    if (nameInput.value === 'You') {
+        const names = ['Alex', 'Jordan', 'Taylor', 'Riley', 'Avery', 'Quinn', 'Parker', 'Sage'];
+        nameInput.value = names[Math.floor(Math.random() * names.length)];
+    }
+})();
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' && cameraView.classList.contains('active')) {
+        e.preventDefault();
+        captureBtn.click();
+    }
+    if (e.key === 'Escape') {
+        if (finalView.classList.contains('active')) backToCameraBtn.click();
+        else if (cameraView.classList.contains('active')) backToJoinBtn.click();
+    }
+});
+
+console.log('📸 TogetherBooth with WebRTC & synced countdown loaded!');
+</script>
 </body>
 </html>
