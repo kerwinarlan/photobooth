@@ -164,6 +164,7 @@
     .connection-pill.failed { color: #ffaaa4; }
 
     .waiting-tile { display: grid; place-items: center; text-align: center; padding: 28px; background: radial-gradient(circle at 50% 30%, rgba(255,214,10,.08), transparent 55%), #101014; }
+    .waiting-tile[hidden] { display: none; }
     .waiting-tile span { font-size: 44px; }
     .waiting-tile strong { display: block; margin-top: 10px; }
     .waiting-tile p { max-width: 260px; margin-top: 6px; color: var(--muted); font-size: 13px; line-height: 1.45; }
@@ -1130,6 +1131,8 @@
       state.socket = null;
       closeAllPeers(true);
       state.participants.clear();
+      state.myPhotos = [];
+      state.completedCaptureIds.clear();
       stopCamera();
       els.socketDot.classList.remove("online");
       els.roomDisplay.textContent = "Not connected";

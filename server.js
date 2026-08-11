@@ -10,7 +10,7 @@ const PORT = Number(process.env.PORT || 3000);
 const MAX_ROOM_SIZE = 2;
 const MAX_PHOTOS = 6;
 const MAX_PHOTO_DATA_LENGTH = 1_500_000;
-const INDEX_PATH = path.join(__dirname, "index.html");
+const INDEX_PATH = path.join(__dirname, "public", "index.html");
 
 const rooms = new Map();
 const memberships = new Map();
@@ -24,7 +24,12 @@ const server = http.createServer((req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
   if (req.method === "GET" && url.pathname === "/") {
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
-    fs.createReadStream(INDEX_PATH).pipe(res);
+    fs.createReadStream(INDEX_PATH)
+      .on("error", () => {
+        res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+        res.end("Internal server error");
+      })
+      .pipe(res);
     return;
   }
   if (req.method === "GET" && url.pathname === "/health") {
@@ -165,3 +170,9 @@ server.listen(PORT, () => {
   console.log(`TogetherBooth running on http://localhost:${PORT}`);
   if (!process.env.TURN_URL) console.log("TURN is not configured. STUN-only WebRTC may fail on restrictive networks.");
 });
+
+function shutdown() {
+  io.close(() => process.exit(0));
+}
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
