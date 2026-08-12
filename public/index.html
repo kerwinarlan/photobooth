@@ -1148,6 +1148,17 @@
       updatePhotoBreakdown();
     }
 
+    function describeCameraError(error) {
+      const name = error?.name || "";
+      const message = String(error?.message || "").toLowerCase();
+      if (!window.isSecureContext) return "Camera needs HTTPS. Open the https:// link (not http://), then allow camera access.";
+      if (name === "NotAllowedError" || message.includes("not allowed") || message.includes("permission")) {
+        return "Camera access was denied. Open this link directly in Safari or Chrome (not an in-app browser), tap Allow when asked, and check Settings > Safari > Camera.";
+      }
+      if (name === "NotFoundError" || message.includes("no camera")) return "No camera was found on this device.";
+      return error?.message || "Could not join the room.";
+    }
+
     async function joinRoom() {
       if (state.joining) return;
       const room = normalizeRoom(els.roomInput.value) || `room-${crypto.randomUUID().slice(0, 8)}`;
@@ -1170,7 +1181,7 @@
         stopCamera();
         state.socket?.disconnect();
         state.socket = null;
-        els.joinHint.textContent = error.message || "Could not join the room.";
+        els.joinHint.textContent = describeCameraError(error);
         els.joinHint.style.color = "#ff8f88";
       } finally {
         state.joining = false;
