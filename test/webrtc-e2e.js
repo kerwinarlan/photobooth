@@ -194,6 +194,18 @@ async function runRound(serverRunning, round) {
       const photosB = await evaluate(b, `state.myPhotos.length`);
       result.photos = { alice: photosA, bob: photosB };
       result.connected = photosA === 1 && photosB === 1;
+      if (result.connected) {
+        // Asymmetric counts: give Alice 6 photos (Bob keeps 1) and check every
+        // strip template still draws photos from BOTH users.
+        const balance = await evaluate(a, `(() => {
+          const img = state.myPhotos[0].dataURL;
+          for (let i = 1; i < 6; i += 1) state.myPhotos.push({ ...state.myPhotos[0], id: "a" + i, takenAt: Date.now() + i });
+          const check = (total) => { const items = balancedPhotos(total); const userIds = [...new Set(items.map((it) => it.userId))]; return { len: items.length, both: userIds.length === 2 }; };
+          return { grid2x2: check(4), grid3x2: check(6) };
+        })()`);
+        result.balance = balance;
+        result.connected = balance.grid2x2.len === 4 && balance.grid2x2.both && balance.grid3x2.len === 6 && balance.grid3x2.both;
+      }
     }
 
     if (!result.connected) {
@@ -218,7 +230,7 @@ async function main() {
       const r = await runRound(server, round);
       const aliceConn = r.alice.peers[0]?.conn;
       const bobConn = r.bob.peers[0]?.conn;
-      const aliceExtra = STUB_PC ? ` relay=${JSON.stringify(r.relayA)}` : process.env.PHOTOS === "1" ? ` photos=${JSON.stringify(r.photos)}` : "";
+      const aliceExtra = STUB_PC ? ` relay=${JSON.stringify(r.relayA)}` : process.env.PHOTOS === "1" ? ` photos=${JSON.stringify(r.photos)} balance=${JSON.stringify(r.balance)}` : "";
       console.log(`round ${round}: alice=${aliceConn}${aliceExtra} bob=${bobConn} -> ${r.connected ? "OK" : "STUCK"}`);
       if (!r.connected) {
         failures += 1;

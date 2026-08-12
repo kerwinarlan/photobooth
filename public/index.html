@@ -964,6 +964,27 @@
       return items;
     }
 
+    // Newest photos of each user, merged round-robin so every user appears
+    // even when photo counts differ (a plain tail slice would drop the minority user).
+    function balancedPhotos(total) {
+      const stacks = allUserGroups()
+        .filter((group) => group.photos.length > 0)
+        .map((group) => ({ userId: group.id, name: group.name, photos: [...group.photos].reverse() }));
+      const items = [];
+      let more = true;
+      while (items.length < total && more) {
+        more = false;
+        stacks.forEach((stack) => {
+          const photo = stack.photos.shift();
+          if (photo) {
+            items.push({ ...photo, name: stack.name, userId: stack.userId });
+            more = true;
+          }
+        });
+      }
+      return items;
+    }
+
     function captureGroups() {
       const groups = allUserGroups();
       const byCapture = new Map();
@@ -1107,7 +1128,7 @@
         const cols = state.currentTemplate === "grid2x2" ? 2 : 3;
         const rows = 2;
         const total = cols * rows;
-        const items = flat.slice(-total);
+        const items = balancedPhotos(total);
         const cellW = (innerW - gap * (cols - 1)) / cols;
         const cellH = (innerH - gap * (rows - 1)) / rows;
         for (let index = 0; index < total; index += 1) {
