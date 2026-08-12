@@ -27,7 +27,7 @@ The only runtime dependency is `socket.io`. All camera, video, and image work us
 - **Synchronized capture** - Server-timestamped countdown with per-client clock-offset estimation.
 - **Dual capture** - Front or back camera, switched live without freezing the partner's preview.
 - **Shared photo tray** - Each person sees both sets of shots, up to six each.
-- **Photostrip builder** - Four templates: couple strip, 2 x 2, 3 x 2, and polaroid.
+- **Photostrip builder** - Five templates: classic film strip (default), couple strip, 2 x 2, 3 x 2, and a dramatic dark polaroid with film grain, vignette, and light leaks.
 - **Screen flash** - Optional flash effect that fires in sync with every capture.
 - **Resilient connections** - Auto-reconnect, room-full handling, and graceful cleanup on leave.
 

@@ -33,9 +33,11 @@
       place-items: center;
       overflow-x: hidden;
       background:
-        radial-gradient(circle at 15% 0%, rgba(255,214,10,.09), transparent 32rem),
-        radial-gradient(circle at 100% 100%, rgba(255,69,58,.08), transparent 32rem),
-        var(--bg);
+        radial-gradient(900px 430px at 50% -6%, rgba(255,214,10,.11), transparent 62%),
+        radial-gradient(circle at 15% 0%, rgba(255,214,10,.06), transparent 30rem),
+        radial-gradient(1200px 800px at 50% 118%, rgba(150,60,190,.12), transparent 62%),
+        radial-gradient(circle at 100% 100%, rgba(255,69,58,.06), transparent 30rem),
+        #050508;
       color: var(--text);
       font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
@@ -44,13 +46,42 @@
     button { -webkit-tap-highlight-color: transparent; }
 
     #app {
+      position: relative;
+      overflow: hidden;
       width: min(1080px, 100%);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,.1);
       border-radius: 34px;
       padding: 22px;
-      background: rgba(23,23,29,.94);
-      box-shadow: var(--shadow);
+      background:
+        radial-gradient(900px 380px at 50% -10%, rgba(255,214,10,.05), transparent 60%),
+        linear-gradient(180deg, rgba(30,26,38,.92), rgba(23,23,29,.94) 34%);
+      box-shadow: 0 24px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,214,10,.1), 0 0 70px -20px rgba(255,214,10,.35);
       backdrop-filter: blur(24px);
+    }
+    /* booth interior: LED strip + scallop curtain along the top */
+    #app::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 46px;
+      pointer-events: none;
+      z-index: 4;
+      border-radius: 34px 34px 0 0;
+      background:
+        linear-gradient(90deg, transparent 4%, rgba(255,214,10,.95) 26%, rgba(255,159,10,.95) 50%, rgba(255,214,10,.95) 74%, transparent 96%) 0 4px / 100% 3px no-repeat,
+        radial-gradient(circle at 50% -10px, transparent 20px, #1c1226 21px) 0 12px / 48px 40px repeat-x,
+        linear-gradient(180deg, #191021, #120c18);
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    /* inner shadow so the booth feels enclosed */
+    #app::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      border-radius: inherit;
+      box-shadow: inset 0 0 90px rgba(0,0,0,.5);
     }
 
     .app-header {
@@ -59,6 +90,7 @@
       justify-content: space-between;
       gap: 14px;
       margin-bottom: 18px;
+      padding-top: 46px;
     }
 
     .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -72,7 +104,16 @@
       color: #101013;
       box-shadow: 0 8px 24px rgba(255,214,10,.2);
     }
-    .brand h1 { font-size: clamp(18px, 3vw, 23px); letter-spacing: -.03em; }
+    .brand h1 {
+      font-size: clamp(18px, 3vw, 23px);
+      letter-spacing: -.03em;
+      text-shadow: 0 0 12px rgba(255,214,10,.55), 0 0 34px rgba(255,159,10,.35);
+      animation: neonPulse 4.5s ease-in-out infinite;
+    }
+    @keyframes neonPulse {
+      0%, 100% { text-shadow: 0 0 10px rgba(255,214,10,.5), 0 0 28px rgba(255,159,10,.3); }
+      50% { text-shadow: 0 0 16px rgba(255,214,10,.8), 0 0 46px rgba(255,159,10,.5); }
+    }
     .brand small { display: block; color: var(--muted); font-size: 11px; margin-top: 1px; }
 
     .room-badge {
@@ -148,11 +189,34 @@
       min-height: 260px;
       aspect-ratio: 4 / 3;
       overflow: hidden;
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,.14);
       border-radius: 22px;
       background: #050506;
       isolation: isolate;
+      box-shadow: inset 0 0 0 3px rgba(0,0,0,.55), 0 14px 34px rgba(0,0,0,.5);
+      transition: box-shadow .35s, border-color .35s;
     }
+    /* live booth screens: neon frame + LIVE badge */
+    .video-box.live, #localVideoBox {
+      border-color: rgba(255,214,10,.42);
+      box-shadow: inset 0 0 0 3px rgba(0,0,0,.55), 0 0 0 1px rgba(255,214,10,.3), 0 0 34px -6px rgba(255,214,10,.4), 0 14px 34px rgba(0,0,0,.5);
+    }
+    .video-box.live::before, #localVideoBox::before {
+      content: "LIVE";
+      position: absolute;
+      top: 10px; left: 12px;
+      z-index: 3;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255,59,48,.9);
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      pointer-events: none;
+      animation: liveBlink 2.2s ease-in-out infinite;
+    }
+    @keyframes liveBlink { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
     .video-box video { width: 100%; height: 100%; display: block; object-fit: cover; background: #08080a; }
     .video-box video.mirrored { transform: scaleX(-1); }
     .preview-fallback { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; background: #08080a; }
@@ -170,8 +234,11 @@
     .waiting-tile strong { display: block; margin-top: 10px; }
     .waiting-tile p { max-width: 260px; margin-top: 6px; color: var(--muted); font-size: 13px; line-height: 1.45; }
 
-    .countdown-overlay { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; opacity: 0; pointer-events: none; font-size: clamp(80px, 20vw, 150px); font-weight: 900; text-shadow: 0 8px 42px rgba(0,0,0,.75); background: rgba(0,0,0,.15); transition: opacity .1s; }
+    .countdown-overlay { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; opacity: 0; pointer-events: none; font-size: clamp(90px, 22vw, 170px); font-weight: 900; text-shadow: 0 8px 42px rgba(0,0,0,.75), 0 0 60px rgba(255,214,10,.45); background: rgba(0,0,0,.18); transition: opacity .1s; }
     .countdown-overlay.show { opacity: 1; }
+    .countdown-overlay::after { content: ""; position: absolute; inset: 24%; border: 6px solid rgba(255,214,10,.9); border-radius: 50%; opacity: 0; transform: scale(.5); box-shadow: 0 0 70px rgba(255,214,10,.55); }
+    .countdown-overlay.show::after { animation: countdownRing 1s ease-out forwards; }
+    @keyframes countdownRing { 0% { opacity: 1; transform: scale(.5); } 100% { opacity: 0; transform: scale(1.06); } }
     .flash { position: absolute; inset: 0; z-index: 8; pointer-events: none; opacity: 0; background: white; }
     .flash.go { animation: flash .25s ease-out; }
     @keyframes flash { 0% { opacity: .94; } 100% { opacity: 0; } }
@@ -180,14 +247,14 @@
     .capture-row .left { justify-self: start; }
     .capture-row .right { justify-self: end; }
     .shutter {
-      width: 78px;
-      height: 78px;
+      width: 86px;
+      height: 86px;
       display: grid;
       place-items: center;
-      border: 4px solid rgba(255,255,255,.17);
+      border: 5px solid rgba(255,255,255,.24);
       border-radius: 50%;
       background: linear-gradient(145deg, var(--accent), var(--accent-2));
-      box-shadow: 0 10px 34px rgba(255,185,10,.23);
+      box-shadow: 0 0 0 5px rgba(255,214,10,.12), 0 12px 38px rgba(255,185,10,.3);
       cursor: pointer;
       transition: transform .15s, opacity .2s;
     }
@@ -214,13 +281,14 @@
     .user-badge.self { color: var(--accent); }
 
     .template-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 9px; margin: 12px 0; }
-    .template-option { padding: 12px 8px; border: 2px solid rgba(255,255,255,.06); border-radius: 15px; background: rgba(255,255,255,.035); color: var(--muted); cursor: pointer; }
-    .template-option.active { color: var(--text); border-color: var(--accent); background: rgba(255,214,10,.07); }
+    .template-option { padding: 12px 8px; border: 1px solid rgba(255,255,255,.07); border-radius: 15px; background: rgba(255,255,255,.035); color: var(--muted); cursor: pointer; transition: border-color .2s, background .2s, transform .12s; }
+    .template-option:hover { border-color: rgba(255,214,10,.28); }
+    .template-option.active { color: var(--text); border-color: var(--accent); background: rgba(255,214,10,.08); box-shadow: 0 0 24px -8px rgba(255,214,10,.45); }
     .template-option strong { display: block; margin-bottom: 3px; color: inherit; }
     .template-option small { font-size: 10px; color: var(--subtle); }
 
-    .canvas-wrap { display: grid; place-items: center; min-height: 360px; margin: 14px 0; padding: 12px; border-radius: 20px; background: #0c0c10; border: 1px solid rgba(255,255,255,.05); }
-    #finalCanvas { display: block; max-width: 100%; max-height: min(68vh, 760px); border-radius: 12px; box-shadow: 0 18px 44px rgba(0,0,0,.45); background: #151519; }
+    .canvas-wrap { display: grid; place-items: center; min-height: 360px; margin: 14px 0; padding: 16px; border-radius: 20px; background: linear-gradient(180deg, #0a0a0e, #101016); border: 1px solid rgba(255,255,255,.07); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -30px 70px rgba(0,0,0,.65); }
+    #finalCanvas { display: block; max-width: 100%; max-height: min(68vh, 760px); border-radius: 10px; box-shadow: 0 24px 54px rgba(0,0,0,.62), 0 2px 0 rgba(255,255,255,.06); background: #151519; }
     .final-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     .final-head h2 { font-size: 24px; }
     .final-head p { color: var(--muted); font-size: 12px; }
@@ -230,6 +298,7 @@
 
     @media (max-width: 640px) {
       #app { padding: 15px; border-radius: 26px; }
+      #app::before { border-radius: 26px 26px 0 0; }
       .brand small { display: none; }
       .room-badge { max-width: 44%; }
       .video-box { min-height: 0; border-radius: 18px; }
@@ -238,6 +307,9 @@
       .shutter::before { width: 48px; height: 48px; font-size: 23px; }
       .capture-row .btn { width: 46px; padding-inline: 0; }
       .capture-row .btn .wide-label { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .brand h1, .video-box.live::before, #localVideoBox::before, .countdown-overlay::after { animation: none; }
     }
   </style>
 </head>
@@ -311,10 +383,11 @@
     <section id="finalView" class="view">
       <div class="final-head"><div><h2>Your shared photostrip</h2><p>Shots are paired by synchronized capture.</p></div><button id="backToCameraBtn" class="btn">← Camera</button></div>
       <div id="templateSelector" class="template-selector">
-        <button class="template-option active" data-template="coupleStrip"><strong>Couple strip</strong><small>paired moments</small></button>
+        <button class="template-option active" data-template="filmStrip"><strong>Film strip</strong><small>classic booth · 4 frames</small></button>
+        <button class="template-option" data-template="coupleStrip"><strong>Couple strip</strong><small>paired moments</small></button>
         <button class="template-option" data-template="grid2x2"><strong>2 × 2</strong><small>classic grid</small></button>
         <button class="template-option" data-template="grid3x2"><strong>3 × 2</strong><small>six frames</small></button>
-        <button class="template-option" data-template="polaroid"><strong>Polaroid</strong><small>hero shot</small></button>
+        <button class="template-option" data-template="polaroid"><strong>Polaroid</strong><small>dramatic print</small></button>
       </div>
       <div class="canvas-wrap"><canvas id="finalCanvas" width="900" height="1200"></canvas></div>
       <div class="action-row">
@@ -359,7 +432,7 @@
       peers: new Map(),
       remoteTiles: new Map(),
       myPhotos: [],
-      currentTemplate: "coupleStrip",
+      currentTemplate: "filmStrip",
       clockOffsetMs: 0,
       countdownFrame: 0,
       activeCaptureId: null,
@@ -493,6 +566,7 @@
       tile.connection.textContent = normalized === "relay" ? "relay preview" : normalized;
       const tone = normalized === "connected" || normalized === "relay" ? "connected" : normalized === "failed" || normalized === "disconnected" ? "failed" : "";
       tile.connection.className = `connection-pill ${tone}`;
+      tile.box.classList.toggle("live", normalized === "connected" || normalized === "relay");
     }
 
     function ensurePeer(userId) {
@@ -1026,17 +1100,64 @@
       });
     }
 
-    function drawImageCover(ctx, image, x, y, w, h, radius = 12) {
+    function coverCrop(image, w, h) {
       const sourceRatio = image.width / image.height;
       const targetRatio = w / h;
-      let sx = 0, sy = 0, sw = image.width, sh = image.height;
-      if (sourceRatio > targetRatio) { sw = image.height * targetRatio; sx = (image.width - sw) / 2; }
-      else { sh = image.width / targetRatio; sy = (image.height - sh) / 2; }
+      if (sourceRatio > targetRatio) {
+        const sw = image.height * targetRatio;
+        return { sx: (image.width - sw) / 2, sy: 0, sw, sh: image.height };
+      }
+      const sh = image.width / targetRatio;
+      return { sx: 0, sy: (image.height - sh) / 2, sw: image.width, sh };
+    }
+
+    function drawImageCover(ctx, image, x, y, w, h, radius = 12) {
+      const { sx, sy, sw, sh } = coverCrop(image, w, h);
       ctx.save();
       roundedRect(ctx, x, y, w, h, radius);
       ctx.clip();
       ctx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
       ctx.restore();
+    }
+
+    function applyGrainRect(ctx, x, y, w, h, alpha = .05, count = 500) {
+      for (let i = 0; i < count; i += 1) {
+        const g = 150 + Math.random() * 105;
+        ctx.fillStyle = `rgba(${g},${g},${g},${alpha})`;
+        ctx.fillRect(x + Math.random() * w, y + Math.random() * h, 1.5, 1.5);
+      }
+    }
+
+    function applyVignetteRect(ctx, x, y, w, h, strength = .35) {
+      const g = ctx.createRadialGradient(x + w / 2, y + h / 2, Math.min(w, h) * .34, x + w / 2, y + h / 2, Math.max(w, h) * .72);
+      g.addColorStop(0, "rgba(0,0,0,0)");
+      g.addColorStop(1, `rgba(0,0,0,${strength})`);
+      ctx.fillStyle = g;
+      ctx.fillRect(x, y, w, h);
+    }
+
+    function drawStripPaper(ctx, W, H) {
+      ctx.fillStyle = "#f3efe6";
+      ctx.fillRect(0, 0, W, H);
+      applyGrainRect(ctx, 0, 0, W, H, .04, 520);
+    }
+
+    function drawSprockets(ctx, W, H) {
+      ctx.fillStyle = "#1d1d24";
+      for (let y = 96; y < H - 52; y += 44) {
+        roundedRect(ctx, 28, y, 18, 12, 6); ctx.fill();
+        roundedRect(ctx, W - 46, y, 18, 12, 6); ctx.fill();
+      }
+    }
+
+    function drawStripFooter(ctx, W, H, date) {
+      ctx.fillStyle = "#23232b";
+      ctx.font = "800 31px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText("TOGETHERBOOTH", W / 2, H - 74);
+      ctx.fillStyle = "#6d6d76";
+      ctx.font = "600 15px system-ui";
+      ctx.fillText(`${date} · #${state.room}`, W / 2, H - 48);
     }
 
     function drawPlaceholder(ctx, x, y, w, h, label = "Waiting for a shot") {
@@ -1051,31 +1172,19 @@
       ctx.restore();
     }
 
-    function drawHeader(ctx, W, title, subtitle) {
-      ctx.fillStyle = "#f7f7f8";
-      ctx.font = "800 38px system-ui";
-      ctx.textAlign = "left";
-      ctx.fillText(title, 46, 58);
-      ctx.fillStyle = "#8f8f99";
-      ctx.font = "500 16px system-ui";
-      ctx.fillText(subtitle, 47, 84);
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#ffd60a";
-      ctx.font = "700 15px system-ui";
-      ctx.fillText(`#${state.room}`, W - 46, 60);
-    }
-
     async function updateFinalStrip() {
       const token = ++state.renderingToken;
       const canvas = els.finalCanvas;
       const ctx = canvas.getContext("2d", { alpha: false });
       const W = canvas.width;
       const H = canvas.height;
-      ctx.fillStyle = "#151519";
-      ctx.fillRect(0, 0, W, H);
+      const innerW = W - 92;
+      const innerH = H - 170;
 
       const flat = interleavedPhotos();
       if (!flat.length) {
+        ctx.fillStyle = "#151519";
+        ctx.fillRect(0, 0, W, H);
         ctx.fillStyle = "#74747f";
         ctx.font = "700 26px system-ui";
         ctx.textAlign = "center";
@@ -1090,81 +1199,134 @@
       if (token !== state.renderingToken) return;
       loaded.forEach(([id, image]) => imageMap.set(id, image));
 
-      drawHeader(ctx, W, "TogetherBooth", new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }));
-      const pad = 46;
-      const top = 112;
-      const bottom = 58;
-      const gap = 16;
-      const innerW = W - pad * 2;
-      const innerH = H - top - bottom;
+      const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 
-      if (state.currentTemplate === "coupleStrip") {
+      if (state.currentTemplate === "filmStrip") {
+        const items = balancedPhotos(4);
+        drawStripPaper(ctx, W, H);
+        drawSprockets(ctx, W, H);
+        const fx = 72, fw = W - 144, gap = 20, top = 84, bottom = 128;
+        const fh = (H - top - bottom - gap * 3) / 4;
+        items.forEach((item, index) => {
+          const y = top + index * (fh + gap);
+          const image = item ? imageMap.get(item.id) : null;
+          if (image) drawImageCover(ctx, image, fx, y, fw, fh, 2);
+          else drawPlaceholder(ctx, fx, y, fw, fh, "");
+        });
+        drawStripFooter(ctx, W, H, date);
+      } else if (state.currentTemplate === "coupleStrip") {
         const users = allUserGroups().slice(0, 2);
         const captures = captureGroups().slice(-4);
         const rows = Math.max(1, Math.min(4, captures.length));
-        const rowH = (innerH - gap * (rows - 1)) / rows;
+        drawStripPaper(ctx, W, H);
+        const pad = 72, top = 92, bottom = 132, gap = 18, colGap = 12;
+        const rowH = (H - top - bottom - gap * (rows - 1)) / rows;
+        const colW = (W - pad * 2 - colGap * (users.length - 1)) / users.length;
         for (let row = 0; row < rows; row += 1) {
           const capture = captures[row];
-          const cols = Math.max(1, users.length);
-          const colGap = users.length > 1 ? 10 : 0;
-          const colW = (innerW - colGap * (cols - 1)) / cols;
           users.forEach((user, col) => {
             const x = pad + col * (colW + colGap);
             const y = top + row * (rowH + gap);
             const entry = capture?.entries.get(user.id);
             const image = entry ? imageMap.get(entry.id) : null;
-            if (image) drawImageCover(ctx, image, x, y, colW, rowH, 15);
+            if (image) drawImageCover(ctx, image, x, y, colW, rowH, 4);
             else drawPlaceholder(ctx, x, y, colW, rowH, user.name);
-            ctx.fillStyle = "rgba(0,0,0,.58)";
-            roundedRect(ctx, x + 10, y + rowH - 34, Math.min(150, colW - 20), 24, 12);
-            ctx.fill();
+            ctx.fillStyle = "rgba(0,0,0,.62)";
+            roundedRect(ctx, x + 12, y + rowH - 40, Math.min(170, colW - 24), 28, 14); ctx.fill();
             ctx.fillStyle = "white";
-            ctx.font = "600 12px system-ui";
+            ctx.font = "700 13px system-ui";
             ctx.textAlign = "left";
-            ctx.fillText(user.name, x + 20, y + rowH - 17);
+            ctx.fillText(user.name, x + 24, y + rowH - 20);
           });
         }
+        drawStripFooter(ctx, W, H, date);
       } else if (state.currentTemplate === "grid2x2" || state.currentTemplate === "grid3x2") {
         const cols = state.currentTemplate === "grid2x2" ? 2 : 3;
         const rows = 2;
         const total = cols * rows;
         const items = balancedPhotos(total);
-        const cellW = (innerW - gap * (cols - 1)) / cols;
-        const cellH = (innerH - gap * (rows - 1)) / rows;
+        drawStripPaper(ctx, W, H);
+        const pad = 54, top = 66, bottom = 128, gap = 16;
+        const cellW = (W - pad * 2 - gap * (cols - 1)) / cols;
+        const cellH = (H - top - bottom - gap * (rows - 1)) / rows;
         for (let index = 0; index < total; index += 1) {
           const x = pad + (index % cols) * (cellW + gap);
           const y = top + Math.floor(index / cols) * (cellH + gap);
           const item = items[index];
           const image = item ? imageMap.get(item.id) : null;
-          if (image) drawImageCover(ctx, image, x, y, cellW, cellH, 14);
+          if (image) drawImageCover(ctx, image, x, y, cellW, cellH, 4);
           else drawPlaceholder(ctx, x, y, cellW, cellH, "");
         }
-      } else {
+        drawStripFooter(ctx, W, H, date);
+      } else if (state.currentTemplate === "polaroid") {
         const item = flat[flat.length - 1];
-        const image = imageMap.get(item.id);
+        const image = item ? imageMap.get(item.id) : null;
+        // dark booth room behind the print
+        ctx.fillStyle = "#0c0c11";
+        ctx.fillRect(0, 0, W, H);
+        const spot = ctx.createRadialGradient(W / 2, H / 2 - 40, 60, W / 2, H / 2 - 40, 580);
+        spot.addColorStop(0, "rgba(255,214,10,.1)");
+        spot.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = spot;
+        ctx.fillRect(0, 0, W, H);
+        applyGrainRect(ctx, 0, 0, W, H, .06, 700);
+        applyVignetteRect(ctx, 0, 0, W, H, .5);
         ctx.save();
         ctx.translate(W / 2, H / 2 + 30);
-        ctx.rotate(-0.025);
-        const cardW = innerW * .82;
-        const cardH = innerH * .82;
-        ctx.shadowColor = "rgba(0,0,0,.45)";
-        ctx.shadowBlur = 34;
-        ctx.fillStyle = "#f2efe8";
-        roundedRect(ctx, -cardW / 2, -cardH / 2, cardW, cardH, 8);
+        ctx.rotate(-0.03);
+        const cardW = innerW * .8, cardH = innerH * .86;
+        ctx.shadowColor = "rgba(0,0,0,.65)";
+        ctx.shadowBlur = 46;
+        ctx.shadowOffsetY = 14;
+        ctx.fillStyle = "#f4f1ea";
+        roundedRect(ctx, -cardW / 2, -cardH / 2, cardW, cardH, 5);
         ctx.fill();
         ctx.shadowBlur = 0;
-        if (image) drawImageCover(ctx, image, -cardW / 2 + 24, -cardH / 2 + 24, cardW - 48, cardH - 120, 4);
-        ctx.fillStyle = "#252529";
-        ctx.font = "700 23px system-ui";
+        ctx.shadowOffsetY = 0;
+        const px = -cardW / 2 + 26, py = -cardH / 2 + 26, pw = cardW - 52, ph = cardH - 210;
+        if (image) {
+          const { sx, sy, sw, sh } = coverCrop(image, pw, ph);
+          ctx.save();
+          roundedRect(ctx, px, py, pw, ph, 2);
+          ctx.clip();
+          ctx.drawImage(image, sx, sy, sw, sh, px, py, pw, ph);
+          // dramatic print effects: warm cast, vignette, grain, light leak
+          ctx.fillStyle = "rgba(255,170,80,.07)";
+          ctx.fillRect(px, py, pw, ph);
+          applyVignetteRect(ctx, px, py, pw, ph, .42);
+          applyGrainRect(ctx, px, py, pw, ph, .05, 320);
+          const leak = ctx.createRadialGradient(px + pw * .82, py - pw * .05, 8, px + pw * .82, py - pw * .05, pw * .85);
+          leak.addColorStop(0, "rgba(255,150,50,.34)");
+          leak.addColorStop(.45, "rgba(255,70,60,.1)");
+          leak.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = leak;
+          ctx.fillRect(px, py, pw, ph);
+          ctx.restore();
+        } else {
+          ctx.fillStyle = "#2a2a31";
+          roundedRect(ctx, px, py, pw, ph, 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = "#2b2b31";
+        ctx.font = "italic 600 25px Georgia, 'Times New Roman', serif";
         ctx.textAlign = "center";
-        ctx.fillText(`${item.name} · together`, 0, cardH / 2 - 38);
+        ctx.fillText(`${item?.name || "someone"} · together`, 0, cardH / 2 - 62);
+        ctx.fillStyle = "#b3242b";
+        ctx.font = "700 13px system-ui";
+        ctx.fillText(date, 0, cardH / 2 - 36);
+        ctx.fillStyle = "#8f8f96";
+        ctx.font = "800 14px system-ui";
+        ctx.fillText("TOGETHERBOOTH", 0, cardH / 2 - 13);
         ctx.restore();
+      } else {
+        const item = flat[flat.length - 1];
+        const image = item ? imageMap.get(item.id) : null;
+        drawStripPaper(ctx, W, H);
+        if (image) drawImageCover(ctx, image, 72, 92, W - 144, H - 250, 6);
+        else drawPlaceholder(ctx, 72, 92, W - 144, H - 250, "");
+        drawStripFooter(ctx, W, H, date);
       }
 
-      ctx.fillStyle = "#6f6f79";
-      ctx.font = "600 13px system-ui";
-      ctx.textAlign = "center";
-      ctx.fillText("made together, from anywhere", W / 2, H - 24);
       els.finalStatus.textContent = `${flat.length} shared photo${flat.length === 1 ? "" : "s"} · ${state.currentTemplate}`;
       updatePhotoBreakdown();
     }
