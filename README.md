@@ -23,7 +23,7 @@ The only runtime dependency is `socket.io`. All camera, video, and image work us
 ## Features
 
 - **Private rooms** - Up to two people per room. Share a link or room name.
-- **Live partner preview** - WebRTC video with automatic connection retry.
+- **Live partner preview** - WebRTC video with automatic connection retry, plus a server-relayed low-fps preview fallback when peer-to-peer can't connect.
 - **Synchronized capture** - Server-timestamped countdown with per-client clock-offset estimation.
 - **Dual capture** - Front or back camera, switched live without freezing the partner's preview.
 - **Shared photo tray** - Each person sees both sets of shots, up to six each.
@@ -75,7 +75,7 @@ npm run check  # syntax-check server.js
 | `TURN_CREDENTIAL` | TURN credential password |
 | `ALLOWED_ORIGIN` | CORS origin override for the Socket.IO handshake |
 
-Without TURN, connections work on open networks but may fail between restrictive networks.
+Without TURN, connections work on open networks but may fail between restrictive networks; in that case the app automatically falls back to relaying low-fps preview frames through the server, so the live preview still works.
 
 ## Project Structure
 

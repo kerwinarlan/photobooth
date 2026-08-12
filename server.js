@@ -10,6 +10,7 @@ const PORT = Number(process.env.PORT || 3000);
 const MAX_ROOM_SIZE = 2;
 const MAX_PHOTOS = 6;
 const MAX_PHOTO_DATA_LENGTH = 1_500_000;
+const MAX_PREVIEW_FRAME_LENGTH = 200_000;
 const INDEX_PATH = path.join(__dirname, "public", "index.html");
 
 const rooms = new Map();
@@ -139,6 +140,12 @@ io.on("connection", (socket) => {
     callback({ ok: true, ...payload });
   });
 
+  socket.on("preview_frame", ({ frame } = {}) => {
+    const room = memberships.get(socket.id);
+    if (!room || !frame || typeof frame.dataURL !== "string" || !frame.dataURL.startsWith("data:image/jpeg") || frame.dataURL.length > MAX_PREVIEW_FRAME_LENGTH) return;
+    socket.to(room).emit("preview_frame", { from: socket.id, dataURL: frame.dataURL });
+  });
+
   socket.on("photo", ({ photo } = {}) => {
     const room = memberships.get(socket.id);
     const user = rooms.get(room)?.get(socket.id);
@@ -168,7 +175,7 @@ io.on("connection", (socket) => {
 
 server.listen(PORT, () => {
   console.log(`TogetherBooth running on http://localhost:${PORT}`);
-  if (!process.env.TURN_URL) console.log("TURN is not configured. STUN-only WebRTC may fail on restrictive networks.");
+  if (!process.env.TURN_URL) console.log("TURN is not configured. STUN-only WebRTC may fail on restrictive networks; live preview will use server relay.");
 });
 
 function shutdown() {

@@ -155,6 +155,7 @@
     }
     .video-box video { width: 100%; height: 100%; display: block; object-fit: cover; background: #08080a; }
     .video-box video.mirrored { transform: scaleX(-1); }
+    .preview-fallback { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; background: #08080a; }
     .video-box::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; box-shadow: inset 0 -110px 80px -80px rgba(0,0,0,.86); }
 
     .video-meta { position: absolute; z-index: 3; left: 11px; right: 11px; bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; pointer-events: none; }
@@ -461,10 +462,14 @@
       countdown.className = "countdown-overlay";
       const flash = document.createElement("div");
       flash.className = "flash";
-      box.append(video, meta, countdown, flash);
+      const preview = document.createElement("img");
+      preview.className = "preview-fallback";
+      preview.alt = "";
+      preview.hidden = true;
+      box.append(preview, video, meta, countdown, flash);
       els.videoGrid.appendChild(box);
 
-      const tile = { box, video, label, connection, countdown, flash };
+      const tile = { box, video, label, connection, countdown, flash, preview };
       state.remoteTiles.set(userId, tile);
       updateWaitingTile();
       return tile;
@@ -485,8 +490,9 @@
       const tile = state.remoteTiles.get(userId);
       if (!tile) return;
       const normalized = value === "completed" ? "connected" : value;
-      tile.connection.textContent = normalized;
-      tile.connection.className = `connection-pill ${normalized === "connected" ? "connected" : normalized === "failed" || normalized === "disconnected" ? "failed" : ""}`;
+      tile.connection.textContent = normalized === "relay" ? "relay preview" : normalized;
+      const tone = normalized === "connected" || normalized === "relay" ? "connected" : normalized === "failed" || normalized === "disconnected" ? "failed" : "";
+      tile.connection.className = `connection-pill ${tone}`;
     }
 
     function ensurePeer(userId) {
@@ -510,6 +516,7 @@
         }
         tile.video.srcObject = remoteStream;
         tile.video.play().catch(() => {});
+        tile.preview.hidden = true;
       };
 
       pc.onicecandidate = ({ candidate }) => {
@@ -519,6 +526,7 @@
       pc.onconnectionstatechange = () => {
         updateConnectionPill(userId, pc.connectionState);
         if (pc.connectionState === "failed") setStatus("Video connection failed. Tap reconnect.");
+        ensurePreviewFrameLoop();
       };
       pc.oniceconnectionstatechange = () => updateConnectionPill(userId, pc.iceConnectionState);
 
@@ -624,6 +632,7 @@
         }
       }
       for (const id of incomingIds) connectToParticipant(id);
+      ensurePreviewFrameLoop();
       renderAll();
     }
 
@@ -696,6 +705,7 @@
           state.participants.set(userId, { name: name || "Partner", photos: [] });
           createRemoteTile(userId, name || "Partner");
           connectToParticipant(userId);
+          ensurePreviewFrameLoop();
           renderAll();
           toast(`${name || "Your person"} joined`);
         });
@@ -733,6 +743,15 @@
           if (participant) participant.photos = [];
           renderAll();
           updateFinalStrip();
+        });
+
+        state.socket.on("preview_frame", ({ from, dataURL }) => {
+          if (!from || from === state.userId) return;
+          const tile = state.remoteTiles.get(from);
+          if (!tile) return;
+          tile.preview.src = dataURL;
+          tile.preview.hidden = false;
+          updateConnectionPill(from, "relay");
         });
       });
     }
@@ -824,6 +843,42 @@
       state.socket.emit("start_countdown", { delayMs: CAPTURE_DELAY_MS }, (response) => {
         if (response?.ok === false) toast(response.error || "Could not start countdown");
       });
+    }
+
+    // ponytail: server-relayed preview frames, WebRTC fallback for restrictive NATs.
+    // Sends only while a peer is not connected; stops itself once all peers connect.
+    const PREVIEW_FRAME_MS = 250;
+    let previewFrameTimer = 0;
+    let previewCanvas = null;
+
+    function peersNeedFallback() {
+      for (const peer of state.peers.values()) {
+        if (peer.pc.connectionState !== "connected") return true;
+      }
+      return false;
+    }
+
+    function ensurePreviewFrameLoop() {
+      if (previewFrameTimer || !state.participants.size || !state.stream) return;
+      previewFrameTimer = setInterval(sendPreviewFrame, PREVIEW_FRAME_MS);
+    }
+
+    function stopPreviewFrameLoop() {
+      clearInterval(previewFrameTimer);
+      previewFrameTimer = 0;
+    }
+
+    function sendPreviewFrame() {
+      if (!state.socket?.connected || !peersNeedFallback()) { stopPreviewFrameLoop(); return; }
+      if (els.localVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+      if (!previewCanvas) {
+        previewCanvas = document.createElement("canvas");
+        previewCanvas.width = 320;
+        previewCanvas.height = 240;
+      }
+      const ctx = previewCanvas.getContext("2d", { alpha: false });
+      try { drawVideoCover(ctx, els.localVideo, 320, 240, state.facingMode === "user"); } catch { return; }
+      state.socket.emit("preview_frame", { frame: { id: state.userId, dataURL: previewCanvas.toDataURL("image/jpeg", 0.55) } });
     }
 
     function retryConnections() {
@@ -1127,6 +1182,7 @@
     function leaveRoom() {
       cancelAnimationFrame(state.countdownFrame);
       setCountdownText("", false);
+      stopPreviewFrameLoop();
       state.socket?.disconnect();
       state.socket = null;
       closeAllPeers(true);
@@ -1206,6 +1262,7 @@
     window.addEventListener("pagehide", () => {
       state.socket?.disconnect();
       stopCamera();
+      stopPreviewFrameLoop();
       closeAllPeers(false);
     });
 
