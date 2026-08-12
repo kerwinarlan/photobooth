@@ -288,7 +288,7 @@
     .template-option small { font-size: 10px; color: var(--subtle); }
 
     .canvas-wrap { display: grid; place-items: center; min-height: 360px; margin: 14px 0; padding: 16px; border-radius: 20px; background: linear-gradient(180deg, #0a0a0e, #101016); border: 1px solid rgba(255,255,255,.07); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -30px 70px rgba(0,0,0,.65); }
-    #finalCanvas { display: block; max-width: 100%; max-height: min(68vh, 760px); border-radius: 10px; box-shadow: 0 24px 54px rgba(0,0,0,.62), 0 2px 0 rgba(255,255,255,.06); background: #151519; }
+    #finalCanvas { display: block; max-width: 100%; max-height: min(72vh, 840px); border-radius: 10px; box-shadow: 0 24px 54px rgba(0,0,0,.62), 0 2px 0 rgba(255,255,255,.06); background: #151519; }
     .final-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     .final-head h2 { font-size: 24px; }
     .final-head p { color: var(--muted); font-size: 12px; }
@@ -384,6 +384,8 @@
       <div class="final-head"><div><h2>Your shared photostrip</h2><p>Shots are paired by synchronized capture.</p></div><button id="backToCameraBtn" class="btn">← Camera</button></div>
       <div id="templateSelector" class="template-selector">
         <button class="template-option active" data-template="filmStrip"><strong>Film strip</strong><small>classic booth · 4 frames</small></button>
+        <button class="template-option" data-template="filmStrip6"><strong>Film strip 6</strong><small>long strip · 6 frames</small></button>
+        <button class="template-option" data-template="instax"><strong>Instax</strong><small>instant print</small></button>
         <button class="template-option" data-template="coupleStrip"><strong>Couple strip</strong><small>paired moments</small></button>
         <button class="template-option" data-template="grid2x2"><strong>2 × 2</strong><small>classic grid</small></button>
         <button class="template-option" data-template="grid3x2"><strong>3 × 2</strong><small>six frames</small></button>
@@ -1120,6 +1122,21 @@
       ctx.restore();
     }
 
+    const FILM_GRADES = {
+      fuji: "saturate(1.12) contrast(1.07) brightness(1.04)",
+      instax: "saturate(1.3) contrast(1.12) sepia(.05)",
+      dslr: "contrast(1.1) saturate(1.03)"
+    };
+
+    // draw a photo with a film-stock color grade, plus subtle grain and vignette
+    function drawGraded(ctx, image, x, y, w, h, radius = 12, grade = "") {
+      if (grade) ctx.filter = grade;
+      drawImageCover(ctx, image, x, y, w, h, radius);
+      if (grade) ctx.filter = "none";
+      applyGrainRect(ctx, x, y, w, h, .04, 200);
+      applyVignetteRect(ctx, x, y, w, h, .2);
+    }
+
     function applyGrainRect(ctx, x, y, w, h, alpha = .05, count = 500) {
       for (let i = 0; i < count; i += 1) {
         const g = 150 + Math.random() * 105;
@@ -1134,6 +1151,24 @@
       g.addColorStop(1, `rgba(0,0,0,${strength})`);
       ctx.fillStyle = g;
       ctx.fillRect(x, y, w, h);
+    }
+
+    const STRIP_CANVAS_SIZES = {
+      filmStrip: [900, 2290],
+      filmStrip6: [900, 3340],
+      instax: [900, 1200],
+      coupleStrip: [900, 1200],
+      grid2x2: [900, 1200],
+      grid3x2: [900, 1200],
+      polaroid: [900, 1200]
+    };
+
+    function setCanvasForTemplate(template) {
+      const [w, h] = STRIP_CANVAS_SIZES[template] || [900, 1200];
+      if (els.finalCanvas.width !== w || els.finalCanvas.height !== h) {
+        els.finalCanvas.width = w;
+        els.finalCanvas.height = h;
+      }
     }
 
     function drawStripPaper(ctx, W, H) {
@@ -1176,6 +1211,7 @@
       const token = ++state.renderingToken;
       const canvas = els.finalCanvas;
       const ctx = canvas.getContext("2d", { alpha: false });
+      setCanvasForTemplate(state.currentTemplate);
       const W = canvas.width;
       const H = canvas.height;
       const innerW = W - 92;
@@ -1201,19 +1237,80 @@
 
       const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 
-      if (state.currentTemplate === "filmStrip") {
-        const items = balancedPhotos(4);
+      if (state.currentTemplate === "filmStrip" || state.currentTemplate === "filmStrip6") {
+        const count = state.currentTemplate === "filmStrip6" ? 6 : 4;
+        const items = balancedPhotos(count);
         drawStripPaper(ctx, W, H);
         drawSprockets(ctx, W, H);
-        const fx = 72, fw = W - 144, gap = 20, top = 84, bottom = 128;
-        const fh = (H - top - bottom - gap * 3) / 4;
+        const fx = 72, fw = W - 144, gap = 20, top = 84, bottom = 150;
+        const fh = (H - top - bottom - gap * (count - 1)) / count;
         items.forEach((item, index) => {
           const y = top + index * (fh + gap);
           const image = item ? imageMap.get(item.id) : null;
-          if (image) drawImageCover(ctx, image, fx, y, fw, fh, 2);
+          if (image) drawGraded(ctx, image, fx, y, fw, fh, 2, FILM_GRADES.fuji);
           else drawPlaceholder(ctx, fx, y, fw, fh, "");
         });
+        ctx.fillStyle = "rgba(70,70,80,.5)";
+        ctx.font = "700 10px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("35MM · TOGETHERBOOTH 400", W / 2, H - 124);
         drawStripFooter(ctx, W, H, date);
+      } else if (state.currentTemplate === "instax") {
+        const item = flat[flat.length - 1];
+        const image = item ? imageMap.get(item.id) : null;
+        // dark booth room behind the print
+        ctx.fillStyle = "#0c0c11";
+        ctx.fillRect(0, 0, W, H);
+        const spot = ctx.createRadialGradient(W / 2, H / 2 - 40, 60, W / 2, H / 2 - 40, 580);
+        spot.addColorStop(0, "rgba(255,214,10,.1)");
+        spot.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = spot;
+        ctx.fillRect(0, 0, W, H);
+        applyGrainRect(ctx, 0, 0, W, H, .06, 700);
+        applyVignetteRect(ctx, 0, 0, W, H, .5);
+        ctx.save();
+        ctx.translate(W / 2, H / 2 + 30);
+        ctx.rotate(-0.02);
+        // landscape instant card (Instax Mini proportions)
+        const cardW = innerW * .8, cardH = cardW * .62;
+        ctx.shadowColor = "rgba(0,0,0,.65)";
+        ctx.shadowBlur = 46;
+        ctx.shadowOffsetY = 14;
+        ctx.fillStyle = "#fafafa";
+        roundedRect(ctx, -cardW / 2, -cardH / 2, cardW, cardH, 8);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.strokeStyle = "rgba(0,0,0,.05)";
+        ctx.lineWidth = 1;
+        roundedRect(ctx, -cardW / 2 + 12, -cardH / 2 + 12, cardW - 24, cardH - 24, 6);
+        ctx.stroke();
+        const pw = cardW * .72, ph = pw * .742;
+        const px = -pw / 2, py = -cardH / 2 + 22;
+        if (image) {
+          const { sx, sy, sw, sh } = coverCrop(image, pw, ph);
+          ctx.save();
+          roundedRect(ctx, px, py, pw, ph, 2);
+          ctx.clip();
+          ctx.filter = FILM_GRADES.instax;
+          ctx.drawImage(image, sx, sy, sw, sh, px, py, pw, ph);
+          ctx.filter = "none";
+          applyVignetteRect(ctx, px, py, pw, ph, .3);
+          applyGrainRect(ctx, px, py, pw, ph, .05, 260);
+          ctx.restore();
+        } else {
+          ctx.fillStyle = "#2a2a31";
+          roundedRect(ctx, px, py, pw, ph, 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = "#3a3a40";
+        ctx.font = "800 15px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("TOGETHERBOOTH", 0, cardH / 2 - 28);
+        ctx.fillStyle = "#b3242b";
+        ctx.font = "700 11px system-ui";
+        ctx.fillText(`★ ${date}`, 0, cardH / 2 - 10);
+        ctx.restore();
       } else if (state.currentTemplate === "coupleStrip") {
         const users = allUserGroups().slice(0, 2);
         const captures = captureGroups().slice(-4);
@@ -1229,7 +1326,7 @@
             const y = top + row * (rowH + gap);
             const entry = capture?.entries.get(user.id);
             const image = entry ? imageMap.get(entry.id) : null;
-            if (image) drawImageCover(ctx, image, x, y, colW, rowH, 4);
+            if (image) drawGraded(ctx, image, x, y, colW, rowH, 4, FILM_GRADES.fuji);
             else drawPlaceholder(ctx, x, y, colW, rowH, user.name);
             ctx.fillStyle = "rgba(0,0,0,.62)";
             roundedRect(ctx, x + 12, y + rowH - 40, Math.min(170, colW - 24), 28, 14); ctx.fill();
@@ -1254,7 +1351,7 @@
           const y = top + Math.floor(index / cols) * (cellH + gap);
           const item = items[index];
           const image = item ? imageMap.get(item.id) : null;
-          if (image) drawImageCover(ctx, image, x, y, cellW, cellH, 4);
+          if (image) drawGraded(ctx, image, x, y, cellW, cellH, 4, FILM_GRADES.dslr);
           else drawPlaceholder(ctx, x, y, cellW, cellH, "");
         }
         drawStripFooter(ctx, W, H, date);

@@ -138,7 +138,7 @@ async function main() {
     };
     await check("filmStrip");
 
-    for (const t of ["coupleStrip", "grid2x2", "grid3x2", "polaroid"]) {
+    for (const t of ["filmStrip6", "instax", "coupleStrip", "grid2x2", "grid3x2", "polaroid"]) {
       await evaluate(c, `document.querySelector('[data-template="${t}"]').click()`);
       await sleep(800);
       await shot(c, `4-${t}`);
