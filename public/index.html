@@ -521,6 +521,11 @@
     function setStatus(message) { els.statusText.textContent = message; }
     function normalizeRoom(value) { return value.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40); }
     function normalizeName(value) { return value.trim().replace(/\s+/g, " ").slice(0, 30); }
+    function getDeviceId() {
+      let id = localStorage.getItem("photobooth-device");
+      if (!id) { id = crypto.randomUUID(); localStorage.setItem("photobooth-device", id); }
+      return id;
+    }
     function roomUrl() { const url = new URL(window.location.href); url.searchParams.set("room", state.room); return url.toString(); }
 
     async function copyRoomLink() {
@@ -768,7 +773,12 @@
           closePeer(id, true);
         }
       }
-      for (const id of incomingIds) connectToParticipant(id);
+      for (const id of incomingIds) {
+        connectToParticipant(id);
+        // Rejoin after a blip: if we are not the offer initiator, the partner must
+        // rebuild the peer, because its old connection to us just died.
+        if (state.userId && !shouldInitiate(id)) state.socket.emit("retry_peer", { targetId: id });
+      }
       ensurePreviewFrameLoop();
       renderAll();
     }
@@ -784,24 +794,26 @@
       });
     }
 
-    async function syncClock() {
-      const samples = [];
-      for (let i = 0; i < 4; i += 1) {
+    async function syncClock(samples = 4) {
+      const collected = [];
+      for (let i = 0; i < samples; i += 1) {
         const started = Date.now();
         try {
           const response = await emitWithAck("sync_clock", {}, 2500);
           const ended = Date.now();
           const midpoint = started + (ended - started) / 2;
-          samples.push({ rtt: ended - started, offset: Number(response.serverNow) - midpoint });
+          collected.push({ rtt: ended - started, offset: Number(response.serverNow) - midpoint });
         } catch {}
       }
-      samples.sort((a, b) => a.rtt - b.rtt);
-      state.clockOffsetMs = samples[0]?.offset || 0;
+      collected.sort((a, b) => a.rtt - b.rtt);
+      // Keep the last known offset when the sync fails mid-session: zeroing it
+      // would desync every later synchronized capture.
+      if (collected.length) state.clockOffsetMs = collected[0].offset;
     }
 
     async function joinSocketRoom() {
-      const response = await emitWithAck("join", { room: state.room, name: state.name });
-      state.userId = state.socket.id;
+      const response = await emitWithAck("join", { room: state.room, name: state.name, deviceId: getDeviceId() });
+      state.userId = response.selfId || state.socket.id;
       applyRoomState(response.users || []);
       await syncClock();
       return response;
@@ -956,6 +968,9 @@
       state.activeCaptureId = captureId;
       els.captureBtn.disabled = true;
       cancelAnimationFrame(state.countdownFrame);
+      // Fresh clock sample on both sides: the offset measured at join drifts on
+      // long sessions and would skew the shutter relative to the server time.
+      syncClock(2).catch(() => {});
 
       const tick = () => {
         const serverNowEstimate = Date.now() + state.clockOffsetMs;
@@ -965,7 +980,9 @@
           state.activeCaptureId = null;
           state.completedCaptureIds.add(captureId);
           if (state.completedCaptureIds.size > 30) state.completedCaptureIds.delete(state.completedCaptureIds.values().next().value);
-          captureLocalPhoto({ captureId, synced: true }).finally(() => { els.captureBtn.disabled = false; });
+          captureLocalPhoto({ captureId, synced: true })
+            .catch(() => { setCountdownText("", false); toast("Capture failed. Try again."); })
+            .finally(() => { els.captureBtn.disabled = false; });
           return;
         }
         setCountdownText(String(Math.max(1, Math.ceil(remaining / 1000))), true);
@@ -1570,7 +1587,7 @@
     els.screenFlashBtn.addEventListener("click", () => {
       state.screenFlash = !state.screenFlash;
       document.getElementById("flashLabel").textContent = state.screenFlash ? "Flash off" : "Screen flash";
-      els.screenFlashBtn.style.borderColor = state.screenFlash ? "rgba(255,214,10,.28)" : "";
+      els.screenFlashBtn.style.borderColor = state.screenFlash ? "rgba(232,163,61,.45)" : "";
     });
 
     els.clearBtn.addEventListener("click", () => {
