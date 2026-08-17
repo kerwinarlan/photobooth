@@ -86,7 +86,7 @@ native web platform APIs; the only runtime dependency is `socket.io`.
 ## Repository Layout
 
 ```
-photobooth-app/
+photobooth/
 ├── server.js            # HTTP + Socket.IO signaling server
 ├── public/
 │   └── index.html       # Entire client: UI, WebRTC, capture, strip rendering
