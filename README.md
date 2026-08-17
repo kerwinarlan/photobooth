@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📸 TogetherBooth
+# 📸 Photobooth
 
 **Two-person online photobooth for long-distance couples**
 
@@ -39,7 +39,7 @@ downloadable photostrip.
 A photobooth is a two-person machine - and long-distance couples can never
 stand in front of one together. Video calls feel like calls, not shared
 moments; the magic of a booth is the synchronized flash and the strip you
-split afterward. TogetherBooth removes the distance:
+split afterward. Photobooth removes the distance:
 
 | Problem | Solution | Result |
 |---|---|---|

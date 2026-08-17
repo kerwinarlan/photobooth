@@ -108,7 +108,7 @@ async function main() {
         x.fillStyle = "rgba(255,255,255,.85)"; x.font = "700 44px system-ui"; x.textAlign = "center";
         x.fillText(label + " " + n, 240, 330);
         x.fillStyle = "rgba(255,214,10,.9)"; x.font = "700 18px system-ui";
-        x.fillText("TOGETHERBOOTH", 240, 610);
+        x.fillText("PHOTOBOOTH", 240, 610);
         return cv.toDataURL("image/jpeg", .8);
       };
       for (let i = 0; i < 4; i += 1) state.myPhotos.push({ id: "me" + i, dataURL: mk("you", i + 1), takenAt: Date.now() - (3 - i) * 60000, captureId: "c" + i });

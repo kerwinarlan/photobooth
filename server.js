@@ -174,7 +174,7 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`TogetherBooth running on http://localhost:${PORT}`);
+  console.log(`Photobooth running on http://localhost:${PORT}`);
   if (!process.env.TURN_URL) console.log("TURN is not configured. STUN-only WebRTC may fail on restrictive networks; live preview will use server relay.");
 });
 

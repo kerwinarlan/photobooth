@@ -1,9 +1,9 @@
-# Render blueprint - one-click deploy for TogetherBooth (Node + Socket.IO).
+# Render blueprint - one-click deploy for Photobooth (Node + Socket.IO).
 # Dashboard -> New -> Blueprint, paste: https://github.com/kerwinarlan/photobooth
 # Or: https://dashboard.render.com/select-repo?type=web, pick this repo.
 services:
   - type: web
-    name: togetherbooth
+    name: photobooth
     runtime: node
     plan: free
     region: oregon
